@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    font-family: 'Inter', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hide-scrollbar::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.hide-scrollbar,
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.premium-blur {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+/* Custom dark theme refinements */
+.dark body { background-color: #0E1116; color: #E6EAF0; }
+.dark .bg-white { background-color: #161A22; }
+.dark .bg-slate-50 { background-color: #0E1116; }
+.dark .border-slate-100 { border-color: rgba(255,255,255,0.05); }
+.dark .text-slate-900 { color: #E6EAF0; }
+.dark .text-slate-500 { color: #9AA3B2; }
+.dark .text-slate-400 { color: #64748b; }
+.dark .bg-slate-100 { background-color: rgba(255,255,255,0.03); }
+
+.card-glow {
+  box-shadow: 0 4px 20px -5px rgba(0,0,0,0.1);
+}
+.dark .card-glow {
+  box-shadow: 0 8px 30px -10px rgba(0,0,0,0.5), 0 0 1px 1px rgba(255,255,255,0.02);
+}
