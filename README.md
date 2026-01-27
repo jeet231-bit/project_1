@@ -133,7 +133,4 @@ Frontend tests (if any) are in `frontend/tests` / top-level `tests`.
 
 ---
 
-If you'd like, I can:
-- add examples for specific endpoints from `backend/app/routers/`;
-- add a short quickstart section tailored to Windows (PowerShell) or WSL;
-- or update the backend README at [backend/README.md](backend/README.md) to keep both in sync.
+
