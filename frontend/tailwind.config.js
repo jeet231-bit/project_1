@@ -5,6 +5,7 @@ export default {
     "./App.tsx",
     "./index.tsx",
     "./screens/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
   ],
   darkMode: 'class',
   theme: {

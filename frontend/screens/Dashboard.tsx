@@ -1,49 +1,53 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../store';
-import { 
+import { api, supabase, signOutExplicitly } from '../src/lib/api';
+import {
   TrendingUp, ChevronRight, Calendar, Info,
   Sun, Moon, Target, Check, Edit2, Plus, ArrowRight, Building2,
-  Sparkles, Send, Loader2, CreditCard, Eye, EyeOff, ArrowUpRight, PieChart,
-  LineChart as LineIcon, Zap
+  Sparkles, Send, Loader2, CreditCard, Eye, EyeOff, ArrowUpRight, PieChart, Wallet,
+  LineChart as LineIcon, Zap, Power, AlertTriangle, Bell, X, TrendingDown, ShieldAlert
 } from 'lucide-react';
-import { SubscriptionStatus, BillingCycle } from '../types';
+import { SubscriptionStatus, BillingCycle, LexMessage, LexAction, ProactiveAlert, MaturityForecast, AlertSeverity } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BarChart, Bar, Cell, ResponsiveContainer, XAxis, Tooltip, AreaChart, Area } from 'recharts';
-import { GoogleGenAI } from "@google/genai";
-
 interface DashboardProps {
-  onNavigate: (tab: 'home' | 'subs' | 'expenses' | 'insights' | 'settings' | 'emis' | 'categoryLogs') => void;
+  onNavigate: (tab: string) => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
-  const { userName, theme, setTheme, isSecureMode, toggleSecureMode, subscriptions, expenses, emis, goals, bankAccounts, updateGoal } = useApp();
+  const { userName, theme, setTheme, isSecureMode, toggleSecureMode, subscriptions, expenses, emis, goals, bankAccounts, setBankAccounts, updateGoal, appendLexMessages, setLexTargetBucket, appendPendingActions, pendingActions, conversationId, setConversationId, modelTier, proactiveAlerts, setProactiveAlerts, maturityForecast, setMaturityForecast, dismissAlert, isAlertDismissedToday, markAlertRead } = useApp();
   const [isEditingGoal, setIsEditingGoal] = useState(false);
   const [newGoalVal, setNewGoalVal] = useState('');
   const [velocityFilter, setVelocityFilter] = useState<'Weekly' | 'Monthly'>('Weekly');
   const [showExplainer, setShowExplainer] = useState<string | null>(null);
+  const [showAddBank, setShowAddBank] = useState(false);
+  const [newBank, setNewBank] = useState({ bankName: '', accountType: 'Savings', balance: '', lastFour: '' });
 
   const [lexQuery, setLexQuery] = useState('');
   const [lexResponse, setLexResponse] = useState<string | null>(null);
+  const [lexSuggestion, setLexSuggestion] = useState<{ text: string, target: string, bucket?: string } | null>(null);
   const [isLexLoading, setIsLexLoading] = useState(false);
+  const [lexHistory, setLexHistory] = useState<LexMessage[]>([]);
+  const [lexActions, setLexActions] = useState<LexAction[]>([]);
 
   const stats = useMemo(() => {
     const activeSubs = subscriptions.filter(s => s.status === SubscriptionStatus.ACTIVE);
     const monthlySubSpend = activeSubs.reduce((acc, sub) => acc + (sub.billingCycle === BillingCycle.MONTHLY ? sub.amount : sub.amount / 12), 0);
     const monthlyEMISpend = emis.reduce((acc, emi) => acc + emi.monthlyAmount, 0);
-    
+
     const now = new Date();
     const monthlyExpenseSpend = expenses.filter(e => {
-        const d = new Date(e.date);
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-      }).reduce((acc, exp) => acc + exp.amount, 0);
+      const d = new Date(e.date);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }).reduce((acc, exp) => acc + exp.amount, 0);
 
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(now.getDate() - 7);
     const weeklyExpenseSpend = expenses.filter(e => new Date(e.date) >= sevenDaysAgo).reduce((acc, exp) => acc + exp.amount, 0);
 
-    return { 
-      totalMonthlySpend: monthlySubSpend + monthlyEMISpend + monthlyExpenseSpend, 
+    return {
+      totalMonthlySpend: monthlySubSpend + monthlyEMISpend + monthlyExpenseSpend,
       monthlyEMISpend,
       monthlySubSpend,
       weeklyExpenseSpend
@@ -65,9 +69,32 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   }, [expenses, subscriptions]);
 
   const velocityData = useMemo(() => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return days.map((day, idx) => ({ name: day, value: [120, 180, 150, 450, 800, 350, 420][idx] }));
-  }, []);
+    if (velocityFilter === 'Weekly') {
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const totals = [0, 0, 0, 0, 0, 0, 0];
+      const now = new Date();
+      // Aggregate expenses from the last 7 days by day-of-week
+      expenses.forEach(exp => {
+        const d = new Date(exp.date);
+        const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays >= 0 && diffDays < 7) {
+          totals[d.getDay()] += exp.amount;
+        }
+      });
+      return days.map((day, idx) => ({ name: day, value: totals[idx], isToday: idx === now.getDay() }));
+    } else {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const totals = new Array(12).fill(0);
+      const currentMonth = new Date().getMonth();
+      expenses.forEach(exp => {
+        const d = new Date(exp.date);
+        if (d.getFullYear() === new Date().getFullYear()) {
+          totals[d.getMonth()] += exp.amount;
+        }
+      });
+      return months.map((m, idx) => ({ name: m, value: totals[idx], isToday: idx === currentMonth }));
+    }
+  }, [expenses, velocityFilter]);
 
   // Growth projection for Wealth Accelerator
   const projectionData = [
@@ -85,6 +112,59 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     setIsEditingGoal(false);
   };
 
+  useEffect(() => {
+    // Probe backend health to verify connection
+    api.get('/health')
+      .then(res => console.log('DEBUG: Backend Health OK:', res))
+      .catch(err => console.error('DEBUG: Backend Health FAIL:', err));
+  }, []);
+
+  // Proactive Intelligence: Fetch alerts + forecast on mount
+  useEffect(() => {
+    const fetchProactiveIntelligence = async () => {
+      try {
+        // Trigger alert detection (compares snapshots, generates new alerts)
+        const checkResult = await api.post('/insights/alerts/check', {});
+        if (checkResult?.alerts?.length > 0) {
+          const filtered = checkResult.alerts.filter((a: ProactiveAlert) => !isAlertDismissedToday(a.id));
+          setProactiveAlerts(filtered);
+        }
+        if (checkResult?.forecast) {
+          setMaturityForecast(checkResult.forecast);
+        }
+
+        // Also fetch any previously persisted unread alerts
+        const alertsResult = await api.get('/insights/alerts');
+        if (alertsResult?.alerts?.length > 0) {
+          // Filter out alerts dismissed today
+          const filtered = alertsResult.alerts.filter((a: ProactiveAlert) => !isAlertDismissedToday(a.id));
+          setProactiveAlerts(filtered);
+        }
+      } catch (err) {
+        console.log('DEBUG: Proactive intelligence fetch skipped:', err);
+      }
+    };
+    fetchProactiveIntelligence();
+  }, []);
+
+  const handleDismissAlert = async (alertId: number) => {
+    dismissAlert(alertId);
+    try {
+      await api.put(`/insights/alerts/${alertId}/dismiss`, {});
+    } catch (err) {
+      console.error('Failed to dismiss alert:', err);
+    }
+  };
+
+  const handleMarkAlertRead = async (alertId: number) => {
+    markAlertRead(alertId);
+    try {
+      await api.put(`/insights/alerts/${alertId}/read`, {});
+    } catch (err) {
+      console.error('Failed to mark alert read:', err);
+    }
+  };
+
   const mask = (val: string | number) => isSecureMode ? "••••" : `₹${val.toLocaleString()}`;
 
   const handleLexQuery = async () => {
@@ -92,30 +172,287 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     setIsLexLoading(true);
     setLexResponse(null);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const promptContext = `You are Lex, a professional and friendly financial strategist for Aryan. Current Spend: ₹${stats.totalMonthlySpend}. Analyze the question and provide a human, action-oriented summary. Q: ${lexQuery}`;
-      const response = await ai.models.generateContent({ model: 'gemini-3-flash-preview', contents: promptContext });
+      // Build conversation_history in OpenAI message format
+      const conversation_history = lexHistory.map(m => ({ role: m.role, content: m.content }));
+
+      const response = await api.post('/insights/lex/query', {
+        query: lexQuery,
+        conversation_history,
+        conversation_id: conversationId,
+        model: modelTier !== 'gpt-4o-mini' ? modelTier : undefined,
+      });
+
+      // Store the conversation_id returned by backend (auto-created if new)
+      if (response.conversation_id && !conversationId) {
+        setConversationId(response.conversation_id);
+      }
+
+      // Update local conversation history
+      const newMessages: LexMessage[] = [
+        { role: 'user', content: lexQuery },
+        { role: 'assistant', content: response.text || '' },
+      ];
+      setLexHistory(prev => [...prev, ...newMessages]);
+
       setLexResponse(response.text);
-    } catch (e) { setLexResponse("I encountered an error. Please try again, Aditya."); }
-    finally { setIsLexLoading(false); }
+      setLexSuggestion(null);
+
+      // Handle Routing Signal (Interactive Suggestion)
+      if (response.routing && response.routing.should_navigate) {
+        const tab = response.routing.target_tab;
+        const tabMap: Record<string, string> = {
+          'money': 'insights',
+          'commitment': 'insights',
+          'behavior': 'insights',
+          'action': 'insights',
+          'spending': 'expenses',
+          'debts': 'emis',
+          'logs': 'categoryLogs'
+        };
+
+        const target = tabMap[tab] || 'insights';
+        console.log(`DEBUG: Lex Routing - Tab: ${tab}, Target: ${target}, Suggestion: ${response.suggestion}`);
+
+        if (response.suggestion) {
+          setLexSuggestion({
+            text: response.suggestion,
+            target,
+            bucket: tab,
+          });
+        }
+      }
+
+      // Capture actions from Lex response
+      if (response.actions && response.actions.length > 0) {
+        setLexActions(response.actions);
+        appendPendingActions(response.actions);
+      }
+
+    } catch (e: any) {
+      setLexResponse(`Error: ${e.message || "Unknown Connection Error"}`);
+      console.error(e);
+    }
+    finally { setIsLexLoading(false); setLexQuery(''); }
+  };
+
+  const handleAddBank = async () => {
+    if (!newBank.bankName || !newBank.lastFour || !newBank.balance) return;
+    try {
+      const res = await api.post('/bank-accounts', {
+        bank_name: newBank.bankName,
+        account_type: newBank.accountType,
+        balance: parseFloat(newBank.balance),
+        last_four: newBank.lastFour,
+      });
+      if (res?.id) {
+        setBankAccounts([...bankAccounts, {
+          id: String(res.id),
+          bankName: newBank.bankName,
+          accountType: newBank.accountType,
+          balance: parseFloat(newBank.balance),
+          lastFour: newBank.lastFour,
+        }]);
+      }
+    } catch (err) {
+      console.error('Failed to add bank account:', err);
+      setBankAccounts([...bankAccounts, {
+        id: Math.random().toString(36).substr(2, 9),
+        bankName: newBank.bankName,
+        accountType: newBank.accountType,
+        balance: parseFloat(newBank.balance),
+        lastFour: newBank.lastFour,
+      }]);
+    }
+    setNewBank({ bankName: '', accountType: 'Savings', balance: '', lastFour: '' });
+    setShowAddBank(false);
   };
 
   return (
     <div className="p-6 pt-10 space-y-8 pb-32 bg-slate-50 dark:bg-premium-dark min-h-screen">
       <header className="flex justify-between items-start">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black text-slate-900 dark:text-premium-text tracking-tight flex items-center gap-2">Hello, Aditya <span className="text-2xl">👋</span></h1>
-          <p className="text-sm font-medium text-slate-400 dark:text-premium-muted">Your financial pulse is steady today.</p>
+        <div className="mr-2 space-y-2 min-w-0 flex-1">
+          <div className="flex items-start gap-2">
+            <span className="text-lg leading-none mt-1">
+              {(() => {
+                const h = new Date().getHours();
+                if (h >= 5 && h < 12) return '☀️';
+                if (h >= 12 && h < 17) return '🌤️';
+                if (h >= 17 && h < 21) return '🌙';
+                return '🌙';
+              })()}
+            </span>
+            <div>
+              <span className="text-xl font-black text-slate-900 dark:text-premium-text tracking-tight leading-tight">
+                {(() => {
+                  const h = new Date().getHours();
+                  if (h >= 5 && h < 12) return 'Good morning,';
+                  if (h >= 12 && h < 17) return 'Good afternoon,';
+                  if (h >= 17 && h < 21) return 'Good evening,';
+                  return 'Good night,';
+                })()}
+              </span>
+              <h1 className="text-xl font-black text-slate-900 dark:text-premium-text tracking-tight leading-tight mt-0.5">
+                {userName || 'there'}
+              </h1>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 whitespace-nowrap text-[13px] font-medium text-slate-400 dark:text-premium-muted">
+            {(() => {
+              const totalOut = stats.totalMonthlySpend;
+              const subCount = subscriptions.filter(s => s.status === 'active').length;
+              if (totalOut > 30000) return <><span>⚡</span><span>Heavy outflow month — ₹{Math.round(totalOut).toLocaleString()} and counting.</span></>;
+              if (subCount >= 5) return <><span>📡</span><span>{subCount} active subscriptions under surveillance.</span></>;
+              if (stats.weeklyExpenseSpend < 500) return <><span>✨</span><span>Minimal spend this week — your discipline is showing.</span></>;
+              return <><span>💚</span><span>Your financial pulse is steady today.</span></>;
+            })()}
+          </div>
         </div>
         <div className="flex gap-2">
-          <button onClick={toggleSecureMode} className="w-11 h-11 rounded-2xl bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 flex items-center justify-center shadow-sm text-slate-600 dark:text-premium-muted active:scale-95 transition-all">
-            {isSecureMode ? <EyeOff size={18} /> : <Eye size={18} />}
+          <button
+            onClick={toggleSecureMode}
+            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-slate-500 dark:text-premium-muted active:scale-90 transition-all hover:border-indigo-200 dark:hover:border-indigo-500/30 group"
+          >
+            {isSecureMode
+              ? <EyeOff size={16} className="group-hover:text-indigo-500 transition-colors" />
+              : <Eye size={16} className="group-hover:text-indigo-500 transition-colors" />
+            }
           </button>
-          <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} className="w-11 h-11 rounded-2xl bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 flex items-center justify-center shadow-sm text-slate-600 dark:text-premium-muted active:scale-95 transition-all">
-            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+          <button
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-slate-500 dark:text-premium-muted active:scale-90 transition-all hover:border-amber-200 dark:hover:border-amber-500/30 group"
+          >
+            {theme === 'light'
+              ? <Moon size={16} className="group-hover:text-amber-500 transition-colors" />
+              : <Sun size={16} className="group-hover:text-amber-400 transition-colors" />
+            }
+          </button>
+          <button
+            onClick={() => signOutExplicitly()}
+            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-rose-400 active:scale-90 transition-all hover:border-rose-200 dark:hover:border-rose-500/30 hover:text-rose-500 group"
+            title="Sign Out"
+          >
+            <Power size={16} />
           </button>
         </div>
       </header>
+
+      {/* Proactive Intelligence Alerts (Phase 4) */}
+      <AnimatePresence>
+        {proactiveAlerts.filter(a => !a.is_dismissed).length > 0 && (
+          <motion.section
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-3"
+          >
+            <div className="flex items-center gap-2 px-1">
+              <Bell size={12} className="text-amber-500" />
+              <h3 className="text-[10px] font-black text-slate-900 dark:text-premium-text uppercase tracking-[0.2em]">
+                Proactive Alerts
+              </h3>
+              <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-[9px] font-black px-2 py-0.5 rounded-full">
+                {proactiveAlerts.filter(a => !a.is_dismissed).length}
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              {proactiveAlerts.filter(a => !a.is_dismissed).slice(0, 3).map((alert) => {
+                const severityConfig: Record<AlertSeverity, { bg: string; border: string; icon: string; text: string; badge: string }> = {
+                  critical: { bg: 'bg-rose-50 dark:bg-rose-500/5', border: 'border-rose-200 dark:border-rose-500/20', icon: 'text-rose-500', text: 'text-rose-800 dark:text-rose-300', badge: 'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400' },
+                  warning: { bg: 'bg-amber-50 dark:bg-amber-500/5', border: 'border-amber-200 dark:border-amber-500/20', icon: 'text-amber-500', text: 'text-amber-800 dark:text-amber-300', badge: 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' },
+                  info: { bg: 'bg-emerald-50 dark:bg-emerald-500/5', border: 'border-emerald-200 dark:border-emerald-500/20', icon: 'text-emerald-500', text: 'text-emerald-800 dark:text-emerald-300', badge: 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' },
+                };
+                const sc = severityConfig[alert.severity] || severityConfig.info;
+
+                return (
+                  <motion.div
+                    key={alert.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20, height: 0 }}
+                    className={`${sc.bg} border ${sc.border} p-5 rounded-[28px] relative group transition-all`}
+                  >
+                    <button
+                      onClick={() => handleDismissAlert(alert.id)}
+                      className="absolute top-3 right-3 p-1.5 rounded-xl opacity-0 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+                    >
+                      <X size={12} className="text-slate-400" />
+                    </button>
+
+                    <div className="flex items-start gap-4">
+                      <div className={`mt-0.5 ${sc.icon}`}>
+                        {alert.severity === 'critical' ? <ShieldAlert size={20} /> :
+                         alert.severity === 'warning' ? <AlertTriangle size={20} /> :
+                         <TrendingUp size={20} />}
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[9px] font-black uppercase tracking-widest ${sc.badge} px-2 py-0.5 rounded-full`}>
+                            {alert.severity}
+                          </span>
+                          <h4 className={`text-xs font-bold ${sc.text}`}>{alert.title}</h4>
+                        </div>
+                        <p className="text-[11px] font-medium text-slate-600 dark:text-premium-muted leading-relaxed">
+                          {alert.message}
+                        </p>
+                        {alert.suggested_action && (
+                          <button
+                            onClick={() => {
+                              handleMarkAlertRead(alert.id);
+                              onNavigate('insights');
+                            }}
+                            className="flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-1 hover:underline"
+                          >
+                            {alert.suggested_action} <ArrowRight size={10} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Maturity Forecast Mini Card */}
+            {maturityForecast && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`p-5 rounded-[28px] border ${
+                  maturityForecast.trajectory === 'improving'
+                    ? 'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/20'
+                    : maturityForecast.trajectory === 'declining'
+                    ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/20'
+                    : 'bg-slate-50 dark:bg-slate-500/5 border-slate-200 dark:border-white/10'
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <div className={`p-3 rounded-2xl ${
+                    maturityForecast.trajectory === 'improving'
+                      ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600'
+                      : maturityForecast.trajectory === 'declining'
+                      ? 'bg-rose-100 dark:bg-rose-500/10 text-rose-600'
+                      : 'bg-slate-100 dark:bg-slate-500/10 text-slate-600'
+                  }`}>
+                    {maturityForecast.trajectory === 'declining' ? <TrendingDown size={20} /> : <TrendingUp size={20} />}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-premium-muted mb-0.5">
+                      Maturity Forecast
+                    </p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-premium-text">
+                      {maturityForecast.trajectory_label} — {maturityForecast.current_score} → {maturityForecast.predictions[maturityForecast.predictions.length - 1]}
+                    </p>
+                    <p className="text-[10px] font-medium text-slate-500 dark:text-premium-muted">
+                      {maturityForecast.confidence} confidence • {maturityForecast.data_points_used} data points
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </motion.section>
+        )}
+      </AnimatePresence>
 
       {/* Linked Liquidity Section */}
       <section className="space-y-4">
@@ -124,28 +461,99 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <h3 className="text-slate-900 dark:text-premium-text font-black text-[10px] uppercase tracking-[0.2em]">Linked Liquidity</h3>
             <button onClick={() => setShowExplainer('liquidity')}><Info size={10} className="text-slate-400" /></button>
           </div>
-          <span className="text-indigo-600 dark:text-indigo-400 text-[10px] font-bold cursor-pointer hover:opacity-70">+ Connect</span>
+          <button onClick={() => setShowAddBank(true)} className="text-indigo-600 dark:text-indigo-400 text-[10px] font-bold cursor-pointer hover:opacity-70 active:scale-95 transition-all">+ Connect</button>
         </div>
-        
+
+        {/* Add Bank Account Form */}
+        <AnimatePresence>
+          {showAddBank && (
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+              <div className="bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 p-5 rounded-[28px] space-y-3 mb-2">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Link New Account</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    placeholder="Bank Name"
+                    value={newBank.bankName}
+                    onChange={e => setNewBank({ ...newBank, bankName: e.target.value })}
+                    className="bg-slate-50 dark:bg-zinc-800 border border-slate-100 dark:border-white/10 rounded-xl px-3 py-2.5 text-xs font-medium outline-none focus:ring-1 focus:ring-indigo-500 dark:text-white"
+                  />
+                  <input
+                    placeholder="Last 4 digits"
+                    maxLength={4}
+                    value={newBank.lastFour}
+                    onChange={e => setNewBank({ ...newBank, lastFour: e.target.value.replace(/\D/g, '') })}
+                    className="bg-slate-50 dark:bg-zinc-800 border border-slate-100 dark:border-white/10 rounded-xl px-3 py-2.5 text-xs font-medium outline-none focus:ring-1 focus:ring-indigo-500 dark:text-white"
+                  />
+                  <input
+                    placeholder="Balance (₹)"
+                    type="number"
+                    value={newBank.balance}
+                    onChange={e => setNewBank({ ...newBank, balance: e.target.value })}
+                    className="bg-slate-50 dark:bg-zinc-800 border border-slate-100 dark:border-white/10 rounded-xl px-3 py-2.5 text-xs font-medium outline-none focus:ring-1 focus:ring-indigo-500 dark:text-white"
+                  />
+                  <select
+                    value={newBank.accountType}
+                    onChange={e => setNewBank({ ...newBank, accountType: e.target.value })}
+                    className="bg-slate-50 dark:bg-zinc-800 border border-slate-100 dark:border-white/10 rounded-xl px-3 py-2.5 text-xs font-medium outline-none focus:ring-1 focus:ring-indigo-500 dark:text-white"
+                  >
+                    <option value="Savings">Savings</option>
+                    <option value="Current">Current</option>
+                    <option value="Credit">Credit Card</option>
+                    <option value="Digital">Digital Wallet</option>
+                  </select>
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <button
+                    onClick={handleAddBank}
+                    className="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
+                  >
+                    Link Account
+                  </button>
+                  <button
+                    onClick={() => setShowAddBank(false)}
+                    className="px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <AnimatePresence>
           {showExplainer === 'liquidity' && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="bg-indigo-50/50 dark:bg-indigo-500/5 p-4 rounded-2xl mb-4">
-              <p className="text-[10px] font-medium text-indigo-900/60 dark:text-indigo-300/60 leading-relaxed">
-                Liquidity represents cash readily available across your linked cards and accounts to cover projected outflows.
-              </p>
+               <p className="text-[10px] font-medium text-indigo-900/60 dark:text-indigo-300/60 leading-relaxed">
+                This shows the total cash you have right now across all your bank accounts and cards. It helps you see how much money is available to cover your bills and expenses.
+               </p>
               <button onClick={() => setShowExplainer(null)} className="text-[9px] font-bold text-indigo-600 mt-2 uppercase tracking-widest">Dismiss</button>
             </motion.div>
           )}
         </AnimatePresence>
 
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 px-1">
-          {bankAccounts.concat([{ id: 'b3', bankName: 'UPI Wallet', balance: 1250, lastFour: 'Wallet', accountType: 'Digital' } as any]).map((acc, i) => (
+          {(() => {
+            // Deduplicate bank accounts by bank name + last four digits
+            const seen = new Set<string>();
+            const unique = bankAccounts.filter(acc => {
+              const key = `${acc.bankName.toLowerCase()}-${acc.lastFour}`;
+              if (seen.has(key)) return false;
+              seen.add(key);
+              return true;
+            });
+            // Always include UPI Wallet
+            if (!unique.some(a => a.bankName === 'UPI Wallet')) {
+              unique.push({ id: 'upi-wallet', bankName: 'UPI Wallet', balance: 1250, lastFour: 'UPI', accountType: 'Digital' } as any);
+            }
+            return unique;
+          })().map((acc, i) => (
             <div key={acc.id} className="min-w-[170px] bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 hover:border-indigo-100 dark:hover:border-indigo-900 transition-all shrink-0 active:scale-95">
               <div className="flex justify-between items-start">
-                <div className={`w-9 h-9 rounded-2xl flex items-center justify-center text-xs ${i % 2 === 0 ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'}`}>
-                  {i % 2 === 0 ? <CreditCard size={16} /> : <Building2 size={16} />}
+                <div className={`w-9 h-9 rounded-2xl flex items-center justify-center text-xs ${acc.accountType === 'Digital' ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'}`}>
+                  {acc.accountType === 'Digital' ? <Wallet size={16} /> : <Building2 size={16} />}
                 </div>
-                <span className="text-slate-300 dark:text-premium-muted/30 text-[10px] font-bold">{acc.lastFour === 'Wallet' ? 'Wallet' : `•••• ${acc.lastFour}`}</span>
+                <span className="text-slate-300 dark:text-premium-muted/30 text-[10px] font-bold">{`•••• ${acc.lastFour}`}</span>
               </div>
               <div>
                 <p className="text-slate-400 dark:text-premium-muted/50 text-[9px] font-black uppercase tracking-widest leading-none mb-1">{acc.bankName}</p>
@@ -193,7 +601,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <div className="relative z-10 flex flex-col gap-6">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-slate-400 dark:text-premium-muted text-[10px] font-black uppercase tracking-[0.2em] mb-1">Portfolio Outflow</p>
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-slate-400 dark:text-premium-muted text-[10px] font-black uppercase tracking-[0.2em]">Portfolio Outflow</p>
+                <button onClick={() => setShowExplainer(showExplainer === 'outflow' ? null : 'outflow')}>
+                  <Info size={10} className="text-slate-500" />
+                </button>
+              </div>
               <h3 className="text-4xl font-black tracking-tighter">{mask(Math.round(stats.monthlySubSpend))}</h3>
               <p className="text-indigo-400 text-[10px] font-bold mt-2 uppercase tracking-widest">Monthly Commitment</p>
             </div>
@@ -201,7 +614,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               <TrendingUp size={24} />
             </div>
           </div>
-          
+
+          <AnimatePresence>
+            {showExplainer === 'outflow' && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="text-[10px] text-slate-400 leading-relaxed font-medium bg-white/5 p-4 rounded-2xl">
+                <p>💡 <strong>Portfolio Outflow</strong> = Total money going out every month on subscriptions.</p>
+                <p className="mt-1"><strong>Weekly Spend</strong> = How much you spent in the last 7 days on everything (food, shopping, etc.).</p>
+                <p className="mt-1"><strong>Health</strong> = A score out of 100. The less you spend on fixed costs compared to your total, the healthier your finances.</p>
+                <button onClick={() => setShowExplainer(null)} className="text-[9px] font-bold text-indigo-400 mt-2 uppercase tracking-widest">Dismiss</button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/5">
             <div>
               <p className="text-slate-500 dark:text-premium-muted text-[9px] font-black uppercase tracking-widest mb-1">Weekly Spend</p>
@@ -209,20 +633,51 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             </div>
             <div>
               <p className="text-slate-500 dark:text-premium-muted text-[9px] font-black uppercase tracking-widest mb-1">Health</p>
-              <p className="text-xl font-black text-emerald-400">92%</p>
+              <p className={`text-xl font-black ${(() => {
+                const totalOut = stats.totalMonthlySpend;
+                const fixedCosts = stats.monthlySubSpend + stats.monthlyEMISpend;
+                if (totalOut === 0) return 'text-emerald-400';
+                const ratio = fixedCosts / totalOut;
+                const health = Math.max(0, Math.min(100, Math.round((1 - ratio) * 100)));
+                if (health >= 70) return 'text-emerald-400';
+                if (health >= 40) return 'text-amber-400';
+                return 'text-rose-400';
+              })()}`}>{(() => {
+                const totalOut = stats.totalMonthlySpend;
+                const fixedCosts = stats.monthlySubSpend + stats.monthlyEMISpend;
+                if (totalOut === 0) return '100%';
+                const ratio = fixedCosts / totalOut;
+                return `${Math.max(0, Math.min(100, Math.round((1 - ratio) * 100)))}%`;
+              })()}</p>
             </div>
           </div>
         </div>
         <div className="absolute -bottom-10 -right-10 opacity-[0.03] scale-[2] pointer-events-none">
-           <PieChart size={180} />
+          <PieChart size={180} />
         </div>
       </section>
 
       {/* Lex AI Intelligence */}
       <section className="space-y-4">
-        <h3 className="text-[10px] font-black text-slate-900 dark:text-premium-text uppercase tracking-[0.2em] px-2 flex items-center gap-2">
-          Lex Intelligence <Sparkles size={12} className="text-indigo-500" />
-        </h3>
+        <div className="flex items-center justify-between px-2">
+          <h3 className="text-[10px] font-black text-slate-900 dark:text-premium-text uppercase tracking-[0.2em] flex items-center gap-2">
+            Lex Intelligence <Sparkles size={12} className="text-indigo-500" />
+          </h3>
+          {lexHistory.length > 0 && (
+            <button
+              onClick={() => {
+                setLexHistory([]);
+                setLexResponse(null);
+                setLexSuggestion(null);
+                setLexQuery('');
+                setConversationId(null);
+              }}
+              className="flex items-center gap-1.5 text-[9px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all active:scale-95"
+            >
+              + New Chat
+            </button>
+          )}
+        </div>
         <div className="bg-slate-50 dark:bg-premium-card border border-slate-100 dark:border-white/5 p-6 rounded-[36px] shadow-inner space-y-4 relative overflow-hidden">
           <div className="flex gap-2">
             <input className="flex-1 bg-white dark:bg-premium-dark border border-slate-100 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm focus:ring-1 focus:ring-indigo-500 outline-none dark:text-premium-text transition-all" placeholder="Where is my money going?" value={lexQuery} onChange={(e) => setLexQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleLexQuery()} />
@@ -231,11 +686,29 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             </button>
           </div>
           <AnimatePresence>{lexResponse && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-premium-dark/50 p-5 rounded-2xl border border-slate-100 dark:border-white/5">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-premium-dark/50 p-5 rounded-2xl border border-slate-100 dark:border-white/5 space-y-4">
               <p className="text-[11px] font-medium text-slate-700 dark:text-premium-muted leading-relaxed whitespace-pre-wrap">{lexResponse}</p>
-              <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-50 dark:border-white/5">
-                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
-                 <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">End-to-End Encrypted Intelligence</span>
+
+              {lexSuggestion && (
+                <button
+                  onClick={() => {
+                    // Persist conversation to global store before navigating
+                    appendLexMessages(lexHistory);
+                    if (lexSuggestion.bucket) {
+                      setLexTargetBucket(lexSuggestion.bucket as any);
+                    }
+                    onNavigate(lexSuggestion.target);
+                  }}
+                  className="w-full flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl group transition-all active:scale-95 border border-indigo-100/50 dark:border-indigo-500/20"
+                >
+                  <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-400">{lexSuggestion.text}</span>
+                  <ArrowRight size={12} className="text-indigo-500 group-hover:translate-x-1 transition-transform" />
+                </button>
+              )}
+
+              <div className="flex items-center gap-2 pt-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+                <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">End-to-End Encrypted Intelligence</span>
               </div>
             </motion.div>
           )}</AnimatePresence>
@@ -278,12 +751,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         </AnimatePresence>
         <div className="bg-white dark:bg-premium-card p-8 rounded-[44px] border border-slate-50 dark:border-white/5 card-glow h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={velocityData}>
+            <BarChart data={velocityData} style={{ border: 'none' }}>
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 700, fill: '#64748b' }} dy={10} />
-              <Tooltip cursor={{ fill: 'transparent' }} content={({active, payload}) => active && payload ? <div className="bg-[#0f172a] text-white px-3 py-1.5 rounded-xl text-[10px] font-black">{mask(payload[0].value as number)}</div> : null} />
-              <Bar dataKey="value" radius={[10, 10, 10, 10]} barSize={26}>
+              <Tooltip cursor={{ fill: 'transparent' }} content={({ active, payload }) => active && payload ? <div className="bg-[#0f172a] text-white px-3 py-1.5 rounded-xl text-[10px] font-black">{mask(payload[0].value as number)}</div> : null} />
+              <Bar dataKey="value" radius={[10, 10, 10, 10]} barSize={velocityFilter === 'Monthly' ? 14 : 26}>
                 {velocityData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={index === 4 ? '#6366f1' : '#f1f5f9'} fillOpacity={theme === 'dark' ? 0.3 : 0.8} />
+                  <Cell key={`cell-${index}`} fill={entry.isToday ? '#6366f1' : theme === 'dark' ? '#2d2d3f' : '#f1f5f9'} fillOpacity={entry.isToday ? 1 : theme === 'dark' ? 0.5 : 0.8} />
                 ))}
               </Bar>
             </BarChart>
@@ -306,7 +779,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               </div>
             ))}
           </div>
-          <button 
+          <button
             onClick={() => onNavigate('categoryLogs')}
             className="w-full flex items-center justify-center gap-2 text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest pt-5 border-t border-slate-50 dark:border-white/5 active:scale-95 transition-all"
           >
@@ -337,7 +810,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <button onClick={() => setShowExplainer('wealth')}><Info size={10} className="text-slate-400" /></button>
           </div>
         </div>
-        
+
         <AnimatePresence>
           {showExplainer === 'wealth' && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="bg-violet-50/50 dark:bg-violet-500/5 p-5 rounded-[2rem] border border-violet-100/50 dark:border-violet-500/10 mb-2">
@@ -354,7 +827,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
         <div className="bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 p-8 rounded-[44px] shadow-2xl space-y-8 relative overflow-hidden group active:scale-[0.99] transition-all">
           <div className="absolute top-0 right-0 w-48 h-48 bg-violet-500/5 rounded-full blur-[80px] pointer-events-none group-hover:bg-violet-500/10 transition-colors"></div>
-          
+
           <div className="flex items-start gap-6 relative z-10">
             <div className="bg-violet-100 dark:bg-violet-500/10 p-5 rounded-[28px] shadow-inner text-violet-600 dark:text-violet-400 animate-pulse-slow">
               <LineIcon size={28} strokeWidth={2.5} />
@@ -376,8 +849,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               <AreaChart data={projectionData}>
                 <defs>
                   <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <Area type="monotone" dataKey="val" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorVal)" />
@@ -390,6 +863,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </button>
         </div>
       </section>
+
+
     </div>
   );
 };

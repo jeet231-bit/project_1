@@ -95,3 +95,83 @@ export interface SharedExpense {
   date: string;
   involvedFriends: string[]; // Friend IDs
 }
+
+// --- Lex Intelligence Types ---
+
+export type ModelTier = 'gpt-4o-mini' | 'gpt-4o';
+
+export interface LexMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface LexConversation {
+  id: string;
+  title: string;
+  model: ModelTier;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LexAction {
+  type: 'cancel_subscription' | 'reduce_budget' | 'switch_plan' | 'reallocate_surplus' | 'set_commitment' | 'invest_freed_capital';
+  label: string;
+  metadata: Record<string, any>;
+}
+
+export interface ActionResult {
+  label: string;
+  status: 'success' | 'failed' | 'skipped' | 'error';
+  detail?: string;
+  reason?: string;
+}
+
+export interface LexMeta {
+  model: string;
+  prompt_tokens: number | null;
+  completion_tokens: number | null;
+  total_tokens: number | null;
+}
+
+export type LexBucket = 'money' | 'commitment' | 'behavior' | 'action' | 'spending' | 'debts';
+
+// --- Proactive Intelligence Types (Phase 4) ---
+
+export type AlertSeverity = 'info' | 'warning' | 'critical';
+
+export type AlertType =
+  | 'maturity_drop'
+  | 'maturity_surge'
+  | 'burden_spike'
+  | 'burden_critical'
+  | 'volatility_surge'
+  | 'persona_shift'
+  | 'drift_increase'
+  | 'maturity_forecast';
+
+export interface ProactiveAlert {
+  id: number;
+  alert_type: AlertType;
+  severity: AlertSeverity;
+  title: string;
+  message: string;
+  metric_deltas: Record<string, any>;
+  suggested_action: string | null;
+  suggested_action_type: string | null;
+  is_read: boolean;
+  is_dismissed: boolean;
+  created_at: string;
+}
+
+export interface MaturityForecast {
+  current_score: number;
+  slope: number;
+  r_squared: number;
+  confidence: 'high' | 'medium' | 'low';
+  trajectory: 'improving' | 'declining' | 'stable';
+  trajectory_label: string;
+  predictions: number[];
+  periods_ahead: number;
+  data_points_used: number;
+  historical_scores: number[];
+}

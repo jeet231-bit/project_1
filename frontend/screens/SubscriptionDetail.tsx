@@ -1,7 +1,13 @@
 
 import React, { useState } from 'react';
 import { useApp } from '../store';
-import { ChevronLeft, User, ArrowLeft, Zap, Music, Play, CircleAlert } from 'lucide-react';
+import { 
+  ChevronLeft, User, ArrowLeft, CircleAlert, BrainCircuit,
+  Tv, Film, Video, Play, Sparkles, Music, Headphones, Bot, BookOpen, Laptop,
+  MessageCircle, MonitorSmartphone, Palette, PenTool, Code, Cloud, ShoppingBag,
+  UtensilsCrossed, Car, Shield, Wifi, Gamepad2, Newspaper, Dumbbell, Briefcase,
+  CreditCard, Repeat
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface Props {
@@ -20,9 +26,67 @@ const SubscriptionDetail: React.FC<Props> = ({ subId, onBack }) => {
 
   const getSubIcon = (name: string) => {
     const n = name.toLowerCase();
-    if (n.includes('netflix')) return <Play size={44} fill="white" />;
-    if (n.includes('spotify')) return <Music size={44} fill="white" />;
-    return <Zap size={44} fill="white" />;
+    const s = { color: 'white' };
+    const sz = 44;
+
+    // Streaming & Video
+    if (n.includes('netflix') || n.includes('prime video')) return <Tv size={sz} style={s} />;
+    if (n.includes('disney') || n.includes('hotstar')) return <Sparkles size={sz} style={s} />;
+    if (n.includes('youtube')) return <Film size={sz} style={s} />;
+    if (n.includes('hbo') || n.includes('hulu') || n.includes('peacock') || n.includes('jio cinema') || n.includes('sonyliv') || n.includes('zee5') || n.includes('voot') || n.includes('mubi')) return <Video size={sz} style={s} />;
+    if (n.includes('crunchyroll') || n.includes('funimation')) return <Play size={sz} fill="white" style={s} />;
+
+    // Music & Audio
+    if (n.includes('spotify') || n.includes('apple music') || n.includes('youtube music') || n.includes('gaana') || n.includes('wynk') || n.includes('jiosaavn') || n.includes('tidal')) return <Music size={sz} style={s} />;
+    if (n.includes('audible') || n.includes('podcast')) return <Headphones size={sz} style={s} />;
+
+    // AI & Productivity
+    if (n.includes('chatgpt') || n.includes('openai') || n.includes('claude') || n.includes('copilot') || n.includes('gemini') || n.includes('perplexity') || n.includes('midjourney')) return <Bot size={sz} style={s} />;
+    if (n.includes('notion') || n.includes('obsidian') || n.includes('evernote') || n.includes('todoist')) return <BookOpen size={sz} style={s} />;
+    if (n.includes('microsoft') || n.includes('office') || n.includes('365')) return <Laptop size={sz} style={s} />;
+    if (n.includes('slack') || n.includes('teams') || n.includes('discord') || n.includes('telegram')) return <MessageCircle size={sz} style={s} />;
+    if (n.includes('zoom') || n.includes('meet') || n.includes('webex')) return <MonitorSmartphone size={sz} style={s} />;
+
+    // Creative & Design
+    if (n.includes('adobe') || n.includes('photoshop') || n.includes('illustrator') || n.includes('lightroom') || n.includes('canva')) return <Palette size={sz} style={s} />;
+    if (n.includes('figma') || n.includes('sketch') || n.includes('invision')) return <PenTool size={sz} style={s} />;
+
+    // Dev Tools
+    if (n.includes('github') || n.includes('gitlab') || n.includes('bitbucket') || n.includes('vercel') || n.includes('netlify') || n.includes('heroku') || n.includes('aws') || n.includes('azure')) return <Code size={sz} style={s} />;
+
+    // Cloud & Storage
+    if (n.includes('google') || n.includes('icloud') || n.includes('dropbox') || n.includes('onedrive') || n.includes('drive')) return <Cloud size={sz} style={s} />;
+
+    // Shopping & Delivery
+    if (n.includes('amazon') || n.includes('flipkart') || n.includes('blinkit') || n.includes('zepto') || n.includes('bigbasket') || n.includes('meesho')) return <ShoppingBag size={sz} style={s} />;
+    if (n.includes('swiggy') || n.includes('zomato') || n.includes('uber eats') || n.includes('doordash')) return <UtensilsCrossed size={sz} style={s} />;
+
+    // Transport & Mobility
+    if (n.includes('uber') || n.includes('ola') || n.includes('rapido') || n.includes('lyft')) return <Car size={sz} style={s} />;
+
+    // VPN & Security
+    if (n.includes('vpn') || n.includes('nord') || n.includes('express') || n.includes('surfshark') || n.includes('proton')) return <Shield size={sz} style={s} />;
+
+    // Internet & Telecom
+    if (n.includes('airtel') || n.includes('jio') || n.includes('vi ') || n.includes('bsnl') || n.includes('wifi') || n.includes('broadband') || n.includes('internet')) return <Wifi size={sz} style={s} />;
+
+    // Gaming
+    if (n.includes('xbox') || n.includes('playstation') || n.includes('steam') || n.includes('nintendo') || n.includes('ea play') || n.includes('game pass')) return <Gamepad2 size={sz} style={s} />;
+
+    // News & Reading
+    if (n.includes('news') || n.includes('times') || n.includes('economist') || n.includes('medium') || n.includes('substack') || n.includes('kindle')) return <Newspaper size={sz} style={s} />;
+
+    // Fitness & Health
+    if (n.includes('gym') || n.includes('fitness') || n.includes('cult') || n.includes('peloton') || n.includes('strava') || n.includes('fitbit') || n.includes('noom')) return <Dumbbell size={sz} style={s} />;
+
+    // Professional & Career
+    if (n.includes('linkedin') || n.includes('coursera') || n.includes('udemy') || n.includes('skillshare') || n.includes('masterclass') || n.includes('unacademy')) return <Briefcase size={sz} style={s} />;
+
+    // Insurance & Finance
+    if (n.includes('insurance') || n.includes('emi') || n.includes('loan') || n.includes('mutual fund')) return <CreditCard size={sz} style={s} />;
+
+    // Generic fallback
+    return <Repeat size={sz} style={s} />;
   };
 
   return (
@@ -97,7 +161,7 @@ const SubscriptionDetail: React.FC<Props> = ({ subId, onBack }) => {
 
         <div className="bg-[#fffbeb] dark:bg-amber-900/10 border border-[#fef3c7] dark:border-amber-900/30 p-8 rounded-[44px] space-y-4 shadow-sm">
           <div className="flex items-center gap-3 text-amber-600">
-            <Zap size={18} fill="currentColor" />
+            <BrainCircuit size={18} />
             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Behavioral Insight</span>
           </div>
           <p className="text-xs text-amber-900 dark:text-amber-200 leading-relaxed font-medium">

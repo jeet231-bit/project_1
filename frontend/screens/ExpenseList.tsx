@@ -1,15 +1,23 @@
 
 import React, { useState } from 'react';
 import { useApp } from '../store';
+import { api } from '../src/lib/api';
 import { 
   Plus, User, Coffee, Car, ShoppingBag, Dumbbell, ChevronUp
 } from 'lucide-react';
 import { PaymentMethod } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const CATEGORIES = ['Food', 'Transport', 'Essentials', 'Health', 'Entertainment', 'Shopping', 'Education', 'Other'];
+
 const ExpenseList: React.FC = () => {
-  const { expenses, isSecureMode } = useApp();
+  const { expenses, addExpense, isSecureMode } = useApp();
   const [showAdd, setShowAdd] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newAmount, setNewAmount] = useState('');
+  const [newCategory, setNewCategory] = useState('Food');
+  const [newPayment, setNewPayment] = useState<PaymentMethod>(PaymentMethod.UPI);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getIcon = (cat: string) => {
     const c = cat.toLowerCase();
@@ -77,17 +85,100 @@ const ExpenseList: React.FC = () => {
       </div>
 
       {showAdd && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xl z-[100] flex items-end">
-          <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} className="bg-white dark:bg-premium-dark w-full rounded-t-[48px] p-10 pb-12 shadow-2xl border-t border-white/5">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xl z-[100] flex items-end" onClick={() => setShowAdd(false)}>
+          <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} onClick={(e) => e.stopPropagation()} className="bg-white dark:bg-premium-dark w-full rounded-t-[48px] p-10 pb-12 shadow-2xl border-t border-white/5">
             <div className="w-12 h-1.5 bg-slate-200 dark:bg-white/10 rounded-full mx-auto mb-10"></div>
             <h2 className="text-3xl font-black mb-10 dark:text-premium-text tracking-tight text-center">New Entry</h2>
             <div className="space-y-6">
-              <input className="w-full bg-slate-50 dark:bg-premium-card border-none rounded-3xl p-6 font-bold outline-none dark:text-premium-text placeholder:text-slate-300 dark:placeholder:text-premium-muted/30 focus:ring-1 focus:ring-indigo-500 transition-all" placeholder="Merchant Name" />
-              <input type="number" className="w-full bg-slate-50 dark:bg-premium-card border-none rounded-3xl p-6 font-black text-3xl outline-none dark:text-premium-text placeholder:text-slate-300 dark:placeholder:text-premium-muted/30 focus:ring-1 focus:ring-indigo-500 transition-all" placeholder="₹0.00" />
+              <input
+                className="w-full bg-slate-50 dark:bg-premium-card border-none rounded-3xl p-6 font-bold outline-none dark:text-premium-text placeholder:text-slate-300 dark:placeholder:text-premium-muted/30 focus:ring-1 focus:ring-indigo-500 transition-all"
+                placeholder="Merchant Name"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+              />
+              <input
+                type="number"
+                className="w-full bg-slate-50 dark:bg-premium-card border-none rounded-3xl p-6 font-black text-3xl outline-none dark:text-premium-text placeholder:text-slate-300 dark:placeholder:text-premium-muted/30 focus:ring-1 focus:ring-indigo-500 transition-all"
+                placeholder="₹0.00"
+                value={newAmount}
+                onChange={(e) => setNewAmount(e.target.value)}
+              />
+              {/* Category selector */}
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIES.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setNewCategory(cat)}
+                    className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                      newCategory === cat
+                        ? 'bg-indigo-600 text-white shadow-lg'
+                        : 'bg-slate-50 dark:bg-premium-card text-slate-400 dark:text-premium-muted border border-slate-100 dark:border-white/5'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              {/* Payment method selector */}
+              <div className="flex gap-2">
+                {[PaymentMethod.UPI, PaymentMethod.CARD, PaymentMethod.CASH].map(pm => (
+                  <button
+                    key={pm}
+                    onClick={() => setNewPayment(pm)}
+                    className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                      newPayment === pm
+                        ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-lg'
+                        : 'bg-slate-50 dark:bg-premium-card text-slate-400 dark:text-premium-muted border border-slate-100 dark:border-white/5'
+                    }`}
+                  >
+                    {pm}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="flex gap-4 mt-12">
-              <button onClick={() => setShowAdd(false)} className="flex-1 py-5 text-slate-400 dark:text-premium-muted font-black uppercase text-[10px] tracking-[0.2em] hover:text-rose-500 transition-colors">Discard</button>
-              <button onClick={() => setShowAdd(false)} className="flex-[2] bg-[#0f172a] dark:bg-indigo-600 text-white py-6 rounded-[28px] font-black uppercase text-[10px] tracking-[0.2em] shadow-2xl active:scale-95 transition-all">Post Transaction</button>
+              <button onClick={() => { setShowAdd(false); setNewName(''); setNewAmount(''); }} className="flex-1 py-5 text-slate-400 dark:text-premium-muted font-black uppercase text-[10px] tracking-[0.2em] hover:text-rose-500 transition-colors">Discard</button>
+              <button
+                disabled={isSubmitting || !newName.trim() || !newAmount}
+                onClick={async () => {
+                  const amount = parseFloat(newAmount);
+                  if (!newName.trim() || isNaN(amount) || amount <= 0) return;
+                  setIsSubmitting(true);
+                  try {
+                    // Try persisting to backend / Supabase
+                    await api.post('/expenses/', {
+                      name: newName.trim(),
+                      amount,
+                      category: newCategory,
+                      subcategory: '',
+                      tags: [],
+                      date: new Date().toISOString().split('T')[0],
+                      paymentMethod: newPayment,
+                    });
+                  } catch (err) {
+                    console.warn('Backend persist failed, saving locally:', err);
+                  }
+                  // Always add to local state so it appears immediately
+                  addExpense({
+                    name: newName.trim(),
+                    amount,
+                    category: newCategory,
+                    subcategory: '',
+                    tags: [],
+                    date: new Date().toISOString().split('T')[0],
+                    paymentMethod: newPayment,
+                  });
+                  setNewName('');
+                  setNewAmount('');
+                  setNewCategory('Food');
+                  setNewPayment(PaymentMethod.UPI);
+                  setIsSubmitting(false);
+                  setShowAdd(false);
+                }}
+                className="flex-[2] bg-[#0f172a] dark:bg-indigo-600 text-white py-6 rounded-[28px] font-black uppercase text-[10px] tracking-[0.2em] shadow-2xl active:scale-95 transition-all disabled:opacity-40"
+              >
+                {isSubmitting ? 'Posting...' : 'Post Transaction'}
+              </button>
             </div>
           </motion.div>
         </div>

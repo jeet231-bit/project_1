@@ -1,8 +1,10 @@
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { api, supabase } from './src/lib/api';
 import { 
   Subscription, Expense, Goal, EMI, CashBalance, BankAccount,
-  SubscriptionStatus, BillingCycle, PaymentMethod, GoalType, Friend, SharedExpense
+  SubscriptionStatus, BillingCycle, PaymentMethod, GoalType, Friend, SharedExpense,
+  LexMessage, LexBucket, LexAction, ActionResult, ModelTier, ProactiveAlert, MaturityForecast
 } from './types';
 
 interface AppState {
@@ -17,8 +19,38 @@ interface AppState {
   cashBalance: CashBalance;
   friends: Friend[];
   sharedExpenses: SharedExpense[];
+  dataLoaded: boolean;
+  // Lex conversational state (shared across screens)
+  lexHistory: LexMessage[];
+  lexTargetBucket: LexBucket | null;
+  pendingActions: LexAction[];
+  actionResults: ActionResult[];
+  conversationId: string | null;
+  modelTier: ModelTier;
+  setLexHistory: (history: LexMessage[]) => void;
+  appendLexMessages: (messages: LexMessage[]) => void;
+  setLexTargetBucket: (bucket: LexBucket | null) => void;
+  clearLexSession: () => void;
+  setPendingActions: (actions: LexAction[]) => void;
+  appendPendingActions: (actions: LexAction[]) => void;
+  clearPendingActions: () => void;
+  setActionResults: (results: ActionResult[]) => void;
+  setConversationId: (id: string | null) => void;
+  setModelTier: (tier: ModelTier) => void;
+  // Proactive Intelligence (Phase 4)
+  proactiveAlerts: ProactiveAlert[];
+  maturityForecast: MaturityForecast | null;
+  setProactiveAlerts: (alerts: ProactiveAlert[]) => void;
+  setMaturityForecast: (forecast: MaturityForecast | null) => void;
+  dismissAlert: (id: number) => void;
+  isAlertDismissedToday: (id: number) => boolean;
+  markAlertRead: (id: number) => void;
   setTheme: (theme: 'light' | 'dark') => void;
   toggleSecureMode: () => void;
+  setSubscriptions: (subs: Subscription[]) => void;
+  setExpenses: (exps: Expense[]) => void;
+  setBankAccounts: (accounts: BankAccount[]) => void;
+  setEmis: (emis: EMI[]) => void;
   addSubscription: (sub: Omit<Subscription, 'id' | 'createdAt'>) => void;
   cancelSubscription: (id: string) => void;
   renewSubscription: (id: string) => void;
@@ -31,15 +63,40 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const MOCK_SUBS: Subscription[] = [
-  { id: '1', name: 'Netflix', category: 'Entertainment', subcategory: 'Streaming', amount: 499, billingCycle: BillingCycle.MONTHLY, nextRenewalDate: '2024-11-20', autoPay: true, status: SubscriptionStatus.ACTIVE, createdAt: '2024-01-01', paymentSource: 'ICICI Bank • 8821', usageScore: 88 },
-  { id: '2', name: 'Spotify', category: 'Entertainment', subcategory: 'Music', amount: 119, billingCycle: BillingCycle.MONTHLY, nextRenewalDate: '2024-11-15', autoPay: true, status: SubscriptionStatus.ACTIVE, createdAt: '2024-02-01', paymentSource: 'HDFC Bank • 1024', usageScore: 92 },
-  { id: '3', name: 'Amazon Prime', category: 'Shopping', subcategory: 'Membership', amount: 1499, billingCycle: BillingCycle.YEARLY, nextRenewalDate: '2024-12-05', autoPay: false, status: SubscriptionStatus.ACTIVE, createdAt: '2023-12-05', paymentSource: 'Credit Card • 4455', usageScore: 45 },
-  { id: '4', name: 'ChatGPT Plus', category: 'Productivity', subcategory: 'AI', amount: 1650, billingCycle: BillingCycle.MONTHLY, nextRenewalDate: '2024-11-28', autoPay: true, status: SubscriptionStatus.ACTIVE, createdAt: '2024-05-10', paymentSource: 'UPI ID • @axl', usageScore: 98 },
-  { id: '5', name: 'Adobe Creative Cloud', category: 'Design', subcategory: 'Professional', amount: 4230, billingCycle: BillingCycle.MONTHLY, nextRenewalDate: '2024-11-10', autoPay: true, status: SubscriptionStatus.ACTIVE, createdAt: '2024-03-15', paymentSource: 'ICICI Bank • 8821', usageScore: 12 },
-  { id: '6', name: 'Old Gym', category: 'Health', subcategory: 'Fitness', amount: 2500, billingCycle: BillingCycle.MONTHLY, nextRenewalDate: '2024-11-10', autoPay: false, status: SubscriptionStatus.CANCELLED, createdAt: '2024-01-15' },
-  { id: '7', name: 'Premium News', category: 'Education', subcategory: 'News', amount: 299, billingCycle: BillingCycle.MONTHLY, nextRenewalDate: '2024-11-10', autoPay: false, status: SubscriptionStatus.CANCELLED, createdAt: '2023-11-15' },
-];
+// ── Helper: Map backend snake_case → frontend camelCase ──────────────
+const mapSubscription = (raw: any): Subscription => ({
+  id: String(raw.id),
+  name: raw.name || '',
+  category: raw.category || '',
+  subcategory: raw.subcategory || '',
+  amount: raw.amount || 0,
+  billingCycle: raw.billing_cycle === 'yearly' ? BillingCycle.YEARLY : BillingCycle.MONTHLY,
+  nextRenewalDate: raw.next_renewal_date || '',
+  autoPay: raw.auto_pay ?? true,
+  status: raw.status === 'cancelled' ? SubscriptionStatus.CANCELLED : SubscriptionStatus.ACTIVE,
+  createdAt: raw.created_at || '',
+  paymentSource: raw.payment_source,
+  usageScore: raw.usage_score,
+});
+
+const mapExpense = (raw: any): Expense => ({
+  id: String(raw.id),
+  name: raw.name || '',
+  category: raw.category || '',
+  subcategory: raw.subcategory || '',
+  tags: raw.tags || [],
+  amount: raw.amount || 0,
+  date: raw.date || '',
+  paymentMethod: (raw.payment_method || 'upi') as PaymentMethod,
+});
+
+const mapBankAccount = (raw: any): BankAccount => ({
+  id: String(raw.id),
+  bankName: raw.bank_name || '',
+  accountType: raw.account_type || 'Savings',
+  balance: raw.balance || 0,
+  lastFour: raw.last_four || '',
+});
 
 const MOCK_FRIENDS: Friend[] = [
   { id: 'f1', name: 'Varun', balance: 1250 },
@@ -52,37 +109,141 @@ const MOCK_SHARED_EXPENSES: SharedExpense[] = [
   { id: 's2', description: 'Movie Tickets', amount: 900, paidBy: 'f2', date: '2024-11-04', involvedFriends: ['f1', 'me'] },
 ];
 
-const MOCK_BANKS: BankAccount[] = [
-  { id: 'b1', bankName: 'ICICI Bank', accountType: 'Savings', balance: 142500, lastFour: '8821' },
-  { id: 'b2', bankName: 'HDFC Bank', accountType: 'Savings', balance: 28400, lastFour: '1024' },
-];
-
-const MOCK_EXPENSES: Expense[] = [
-  { id: 'e1', name: 'Blue Tokai Coffee', category: 'Food', subcategory: 'Cafe', tags: ['work'], amount: 350, date: '2024-11-04', paymentMethod: PaymentMethod.UPI },
-  { id: 'e2', name: 'Grocery Run', category: 'Essentials', subcategory: 'Groceries', tags: ['home'], amount: 1200, date: '2024-11-03', paymentMethod: PaymentMethod.CARD },
-  { id: 'e3', name: 'Rickshaw Ride', category: 'Transport', subcategory: 'Commute', tags: ['travel'], amount: 60, date: '2024-11-04', paymentMethod: PaymentMethod.CASH },
-];
-
-const MOCK_GOALS: Goal[] = [
-  { id: 'g1', type: GoalType.SAVINGS, targetAmount: 50000, period: 'monthly', currentProgress: 12500 },
-];
-
-const MOCK_EMIS: EMI[] = [
-  { id: 'm1', name: 'MacBook Air EMI', monthlyAmount: 5500, dueDate: '2024-11-05' },
-];
-
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<'light' | 'dark'>('light');
   const [isSecureMode, setIsSecureMode] = useState(false);
-  const [userName] = useState('Aryan Singh');
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>(MOCK_SUBS);
-  const [expenses, setExpenses] = useState<Expense[]>(MOCK_EXPENSES);
-  const [goals, setGoals] = useState<Goal[]>(MOCK_GOALS);
-  const [emis] = useState<EMI[]>(MOCK_EMIS);
-  const [bankAccounts] = useState<BankAccount[]>(MOCK_BANKS);
+  const [userName, setUserName] = useState('');
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([
+    { id: 'g1', type: GoalType.SAVINGS, targetAmount: 50000, period: 'monthly', currentProgress: 0 },
+  ]);
+  const [emis, setEmis] = useState<EMI[]>([
+    { id: 'emi1', name: 'Car Loan', monthlyAmount: 11000, dueDate: '2026-04-05' },
+    { id: 'emi2', name: 'Phone EMI', monthlyAmount: 3400, dueDate: '2026-04-10' },
+  ]);
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [friends, setFriends] = useState<Friend[]>(MOCK_FRIENDS);
   const [sharedExpenses, setSharedExpenses] = useState<SharedExpense[]>(MOCK_SHARED_EXPENSES);
-  const [cashBalance, setCashBalance] = useState<CashBalance>({ openingBalance: 10000, currentBalance: 8500 });
+  const [cashBalance, setCashBalance] = useState<CashBalance>({ openingBalance: 0, currentBalance: 0 });
+
+  // ── Fetch real data from backend on mount ───────────────────────────
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        // Get user's display name from Supabase
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email) {
+          // Always extract first name from email (dot-separated) for cleaner display
+          const emailFirstName = user.email.split('@')[0].split('.')[0];
+          const displayName = emailFirstName.charAt(0).toUpperCase() + emailFirstName.slice(1).toLowerCase();
+          setUserName(displayName);
+        }
+
+        // Fetch all real data in parallel (allSettled so one failure doesn't block others)
+        const [subsRes, expRes, bankRes] = await Promise.allSettled([
+          api.get('/subscriptions'),
+          api.get('/expenses'),
+          api.get('/bank-accounts'),
+        ]);
+
+        // Map backend data → frontend types (log failures explicitly)
+        if (subsRes.status === 'fulfilled' && Array.isArray(subsRes.value)) {
+          setSubscriptions(subsRes.value.map(mapSubscription));
+          console.log('DEBUG: Loaded', subsRes.value.length, 'subscriptions');
+        } else if (subsRes.status === 'rejected') {
+          console.error('DEBUG: Failed to fetch subscriptions:', subsRes.reason);
+        }
+
+        if (expRes.status === 'fulfilled' && Array.isArray(expRes.value)) {
+          setExpenses(expRes.value.map(mapExpense));
+          console.log('DEBUG: Loaded', expRes.value.length, 'expenses');
+        } else if (expRes.status === 'rejected') {
+          console.error('DEBUG: Failed to fetch expenses:', expRes.reason);
+        }
+
+        if (bankRes.status === 'fulfilled' && Array.isArray(bankRes.value)) {
+          const allAccounts = bankRes.value.map(mapBankAccount);
+          // Auto-cleanup: delete duplicate bank accounts and HDFC 3199 from DB
+          const seen = new Set<string>();
+          const keepAccounts: typeof allAccounts = [];
+          const deleteIds: string[] = [];
+          allAccounts.forEach(acc => {
+            const key = `${acc.bankName.toLowerCase()}-${acc.lastFour}`;
+            // Remove all HDFC 3199 entries
+            if (acc.bankName.toLowerCase() === 'hdfc' && acc.lastFour === '3199') {
+              deleteIds.push(acc.id);
+              return;
+            }
+            // Dedup remaining by bankName + lastFour
+            if (seen.has(key)) {
+              deleteIds.push(acc.id);
+            } else {
+              seen.add(key);
+              keepAccounts.push(acc);
+            }
+          });
+          // Delete from backend
+          if (deleteIds.length > 0) {
+            console.log('DEBUG: Removing', deleteIds.length, 'bank accounts (duplicates + HDFC 3199)');
+            deleteIds.forEach(id => {
+              api.delete(`/bank-accounts/${id}`).catch(err =>
+                console.warn('DEBUG: Failed to delete bank account:', id, err)
+              );
+            });
+          }
+          setBankAccounts(keepAccounts);
+          console.log('DEBUG: Loaded', keepAccounts.length, 'bank accounts');
+        } else if (bankRes.status === 'rejected') {
+          console.error('DEBUG: Failed to fetch bank accounts:', bankRes.reason);
+        }
+
+        setDataLoaded(true);
+      } catch (err) {
+        console.warn('DEBUG: Failed to load user data, using empty state:', err);
+        setDataLoaded(true);
+      }
+    };
+
+    loadUserData();
+  }, []);
+
+  // Lex conversational memory
+  const [lexHistory, setLexHistory] = useState<LexMessage[]>([]);
+  const [lexTargetBucket, setLexTargetBucket] = useState<LexBucket | null>(null);
+  const appendLexMessages = useCallback((msgs: LexMessage[]) => setLexHistory(prev => [...prev, ...msgs]), []);
+  const clearLexSession = useCallback(() => { setLexHistory([]); setLexTargetBucket(null); setConversationId(null); }, []);
+
+  // Conversation persistence
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [modelTier, setModelTier] = useState<ModelTier>('gpt-4o-mini');
+
+  // Action execution state
+  const [pendingActions, setPendingActions] = useState<LexAction[]>([]);
+  const [actionResults, setActionResults] = useState<ActionResult[]>([]);
+  const appendPendingActions = useCallback((actions: LexAction[]) => setPendingActions(prev => [...prev, ...actions]), []);
+  const clearPendingActions = useCallback(() => { setPendingActions([]); setActionResults([]); }, []);
+
+  // Proactive Intelligence state (Phase 4)
+  const [proactiveAlerts, setProactiveAlerts] = useState<ProactiveAlert[]>([]);
+  const [maturityForecast, setMaturityForecast] = useState<MaturityForecast | null>(null);
+  const dismissAlert = useCallback((id: number) => {
+    // Persist dismiss to localStorage with today's date so it only comes back tomorrow
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const stored = JSON.parse(localStorage.getItem('dismissedAlerts') || '{}');
+    stored[id] = today;
+    localStorage.setItem('dismissedAlerts', JSON.stringify(stored));
+    setProactiveAlerts(prev => prev.filter(a => a.id !== id));
+  }, []);
+  const isAlertDismissedToday = useCallback((id: number) => {
+    const today = new Date().toISOString().split('T')[0];
+    const stored = JSON.parse(localStorage.getItem('dismissedAlerts') || '{}');
+    return stored[id] === today;
+  }, []);
+  const markAlertRead = useCallback((id: number) => {
+    setProactiveAlerts(prev => prev.map(a => a.id === id ? { ...a, is_read: true } : a));
+  }, []);
 
   const setTheme = useCallback((t: 'light' | 'dark') => {
     setThemeState(t);
@@ -138,7 +299,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <AppContext.Provider value={{ 
       userName, theme, setTheme, isSecureMode, toggleSecureMode, subscriptions, expenses, goals, emis, cashBalance, bankAccounts,
-      friends, sharedExpenses, addSubscription, cancelSubscription, renewSubscription, addExpense, updateGoal, updateCashBalance,
+      friends, sharedExpenses, dataLoaded, lexHistory, lexTargetBucket, pendingActions, actionResults,
+      conversationId, modelTier,
+      setLexHistory, appendLexMessages, setLexTargetBucket, clearLexSession,
+      setPendingActions, appendPendingActions, clearPendingActions, setActionResults,
+      setConversationId, setModelTier,
+      proactiveAlerts, maturityForecast, setProactiveAlerts, setMaturityForecast, dismissAlert, isAlertDismissedToday, markAlertRead,
+      setSubscriptions, setExpenses, setBankAccounts, setEmis,
+      addSubscription, cancelSubscription, renewSubscription, addExpense, updateGoal, updateCashBalance,
       addSharedExpense, settleWithFriend
     }}>
       {children}

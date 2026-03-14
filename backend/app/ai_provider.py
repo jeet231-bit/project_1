@@ -29,22 +29,22 @@ class MockAIProvider(AIProvider):
         ]
         return mock_insights
 
-class LiquidAIProvider(AIProvider):
+class LexAIProvider(AIProvider):
     """
-    Stub for the Liquid AI provider using lfm2.5-1.2b-instruct-q4_k_m.gguf.
+    Stub for the Lex AI provider (formerly Liquid AI).
     
-    NOTE: This is a placeholder and is not integrated with any inference engine.
+    NOTE: This is a placeholder and is not integrated with any inference engine yet.
     """
     def __init__(self, model_path: str = "lfm2.5-1.2b-instruct-q4_k_m.gguf"):
         self.model_path = model_path
 
     def get_insights(self, user_data: Dict[str, Any]) -> List[Insight]:
         # This is a stub. No actual inference is performed.
-        raise NotImplementedError("Liquid AI provider is not yet implemented.")
+        raise NotImplementedError("Lex AI provider is not yet implemented.")
 
 def get_ai_provider(provider_name: str = "mock") -> AIProvider:
-    if provider_name == "liquid_ai":
-        return LiquidAIProvider()
+    if provider_name == "lex_ai" or provider_name == "liquid_ai":
+        return LexAIProvider()
     elif provider_name == "mock":
         return MockAIProvider()
     else:

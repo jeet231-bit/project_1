@@ -36,3 +36,18 @@ body {
 .dark .card-glow {
   box-shadow: 0 8px 30px -10px rgba(0,0,0,0.5), 0 0 1px 1px rgba(255,255,255,0.02);
 }
+
+/* Remove default Recharts chart border */
+.recharts-wrapper,
+.recharts-surface {
+  outline: none !important;
+  border: none !important;
+}
+.recharts-cartesian-grid-bg,
+.recharts-cartesian-grid {
+  display: none !important;
+}
+.recharts-surface > rect {
+  fill: transparent !important;
+  stroke: none !important;
+}

@@ -1,1 +1,34 @@
+# Dependencies
+node_modules/
+backend/venv/
+__pycache__/
+*.pyc
+
+# Models (too large for GitHub)
+models/
+backend/models/
+*.gguf
+
+# Environment
+.env
+backend/.env
+frontend/.env
+
+# IDE
+.vscode/
+.idea/
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Pytest
 .pytest_cache/
+
+# Misc
+*.log
