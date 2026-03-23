@@ -6,7 +6,7 @@ import {
   Brain, Landmark, Loader2, TrendingUp, TrendingDown, Minus
 } from 'lucide-react';
 import { useApp } from '../store';
-import { api, supabase, signOutExplicitly } from '../src/lib/api';
+import { api, apiUrl, supabase, signOutExplicitly } from '../src/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Settings: React.FC = () => {
@@ -54,7 +54,7 @@ const Settings: React.FC = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
-      const res = await fetch('http://localhost:8000/export/expenses-csv', {
+      const res = await fetch(`${apiUrl}/export/expenses-csv`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const blob = await res.blob();
@@ -389,19 +389,17 @@ const Settings: React.FC = () => {
                                     <div className="grid grid-cols-3 gap-2">
                                       <div className="bg-white dark:bg-zinc-900 p-3 rounded-xl text-center">
                                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Volatility</p>
-                                        <p className={`text-sm font-black ${
-                                          (behaviorData.metrics.spend_volatility?.volatility_score || 0) >= 60 ? 'text-rose-500' :
-                                          (behaviorData.metrics.spend_volatility?.volatility_score || 0) >= 30 ? 'text-amber-500' : 'text-emerald-500'
-                                        }`}>
+                                        <p className={`text-sm font-black ${(behaviorData.metrics.spend_volatility?.volatility_score || 0) >= 60 ? 'text-rose-500' :
+                                            (behaviorData.metrics.spend_volatility?.volatility_score || 0) >= 30 ? 'text-amber-500' : 'text-emerald-500'
+                                          }`}>
                                           {behaviorData.metrics.spend_volatility?.volatility_score || 0}
                                         </p>
                                       </div>
                                       <div className="bg-white dark:bg-zinc-900 p-3 rounded-xl text-center">
                                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Burden</p>
-                                        <p className={`text-sm font-black ${
-                                          behaviorData.metrics.subscription_burden?.risk_level === 'Critical' ? 'text-rose-500' :
-                                          behaviorData.metrics.subscription_burden?.risk_level === 'Elevated' ? 'text-amber-500' : 'text-emerald-500'
-                                        }`}>
+                                        <p className={`text-sm font-black ${behaviorData.metrics.subscription_burden?.risk_level === 'Critical' ? 'text-rose-500' :
+                                            behaviorData.metrics.subscription_burden?.risk_level === 'Elevated' ? 'text-amber-500' : 'text-emerald-500'
+                                          }`}>
                                           {behaviorData.metrics.subscription_burden?.risk_level || 'N/A'}
                                         </p>
                                       </div>
@@ -409,8 +407,8 @@ const Settings: React.FC = () => {
                                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Trend</p>
                                         <p className="text-sm font-black text-slate-700 dark:text-zinc-200 capitalize flex items-center justify-center gap-1">
                                           {behaviorData.metrics.spend_volatility?.trend === 'improving' ? <TrendingDown size={12} className="text-emerald-500" /> :
-                                           behaviorData.metrics.spend_volatility?.trend === 'worsening' ? <TrendingUp size={12} className="text-rose-500" /> :
-                                           <Minus size={12} className="text-slate-400" />}
+                                            behaviorData.metrics.spend_volatility?.trend === 'worsening' ? <TrendingUp size={12} className="text-rose-500" /> :
+                                              <Minus size={12} className="text-slate-400" />}
                                           {behaviorData.metrics.spend_volatility?.trend || '—'}
                                         </p>
                                       </div>
@@ -457,7 +455,7 @@ const Settings: React.FC = () => {
           <Shield size={12} />
           <span className="text-[10px] font-black uppercase tracking-widest">End-to-End Encrypted Storage</span>
         </div>
-        <p className="text-[9px] font-bold">FinIQ v1.0.8 • Silicon Architecture</p>
+        <p className="text-[9px] font-bold">SpndWisee v1.0.0 • Silicon Architecture</p>
       </div>
     </div>
   );

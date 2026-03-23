@@ -16,7 +16,7 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
-  const { userName, theme, setTheme, isSecureMode, toggleSecureMode, subscriptions, expenses, emis, goals, bankAccounts, setBankAccounts, updateGoal, appendLexMessages, setLexTargetBucket, appendPendingActions, pendingActions, conversationId, setConversationId, modelTier, proactiveAlerts, setProactiveAlerts, maturityForecast, setMaturityForecast, dismissAlert, isAlertDismissedToday, markAlertRead } = useApp();
+  const { userName, theme, setTheme, isSecureMode, toggleSecureMode, subscriptions, expenses, emis, goals, bankAccounts, setBankAccounts, budgets, updateGoal, appendLexMessages, setLexTargetBucket, appendPendingActions, pendingActions, conversationId, setConversationId, modelTier, proactiveAlerts, setProactiveAlerts, maturityForecast, setMaturityForecast, dismissAlert, isAlertDismissedToday, markAlertRead } = useApp();
   const [isEditingGoal, setIsEditingGoal] = useState(false);
   const [newGoalVal, setNewGoalVal] = useState('');
   const [velocityFilter, setVelocityFilter] = useState<'Weekly' | 'Monthly'>('Weekly');
@@ -207,7 +207,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           'action': 'insights',
           'spending': 'expenses',
           'debts': 'emis',
-          'logs': 'categoryLogs'
+          'logs': 'categoryLogs',
+          'budgets': 'budgets'
         };
 
         const target = tabMap[tab] || 'insights';
@@ -370,7 +371,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20, height: 0 }}
-                    className={`${sc.bg} border ${sc.border} p-5 rounded-[28px] relative group transition-all`}
+                    className={`${sc.bg} border ${sc.border} p-5 rounded-[28px] relative group transition-all text-left`}
                   >
                     <button
                       onClick={() => handleDismissAlert(alert.id)}
@@ -385,14 +386,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                          alert.severity === 'warning' ? <AlertTriangle size={20} /> :
                          <TrendingUp size={20} />}
                       </div>
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2">
+                      <div className="flex-1 space-y-2 text-left">
+                        <div className="flex items-center gap-2 justify-start">
                           <span className={`text-[9px] font-black uppercase tracking-widest ${sc.badge} px-2 py-0.5 rounded-full`}>
                             {alert.severity}
                           </span>
                           <h4 className={`text-xs font-bold ${sc.text}`}>{alert.title}</h4>
                         </div>
-                        <p className="text-[11px] font-medium text-slate-600 dark:text-premium-muted leading-relaxed">
+                        <p className="text-[11px] font-medium text-slate-600 dark:text-premium-muted leading-relaxed text-left">
                           {alert.message}
                         </p>
                         {alert.suggested_action && (
@@ -401,7 +402,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                               handleMarkAlertRead(alert.id);
                               onNavigate('insights');
                             }}
-                            className="flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-1 hover:underline"
+                            className="flex items-center gap-1.5 justify-start text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-1 text-left hover:underline"
                           >
                             {alert.suggested_action} <ArrowRight size={10} />
                           </button>
@@ -727,6 +728,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <div className="bg-white/10 p-2.5 rounded-full"><ChevronRight size={18} className="text-zinc-400" /></div>
       </button>
 
+      {/* Budget Tracker Card */}
+      <button onClick={() => onNavigate('budgets')} className="w-full bg-[#0f172a] dark:bg-premium-card rounded-[40px] p-8 text-white flex items-center justify-between shadow-2xl active:scale-[0.98] transition-all hover:bg-slate-900 dark:hover:bg-premium-card/80">
+        <div className="flex items-center gap-6 text-left">
+          <div className="bg-white/10 dark:bg-emerald-500/10 p-4 rounded-2xl text-white dark:text-emerald-400"><Target size={24} /></div>
+          <div>
+            <p className="text-[10px] text-zinc-400 dark:text-premium-muted font-bold uppercase tracking-[0.2em] mb-1">Category Budgets</p>
+            <p className="text-2xl font-black tracking-tight">{budgets.length} <span className="text-xs font-medium opacity-50">active</span></p>
+          </div>
+        </div>
+        <div className="bg-white/10 p-2.5 rounded-full"><ChevronRight size={18} className="text-zinc-400" /></div>
+      </button>
+
       {/* Expense Velocity Chart */}
       <section className="space-y-4">
         <div className="flex justify-between items-center px-2">
@@ -789,21 +802,34 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       </section>
 
       {/* Recovery Mode */}
-      <div className="bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/10 p-7 rounded-[40px] flex items-center justify-between group active:scale-95 transition-all cursor-pointer">
-        <div className="flex items-center gap-6">
-          <div className="bg-white dark:bg-premium-dark p-4 rounded-2xl shadow-sm text-emerald-500"><TrendingUp size={24} /></div>
-          <div>
-            <h4 className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-[0.2em] mb-1 leading-none">RECOVERY MODE</h4>
-            <p className="text-xs font-bold text-emerald-900 dark:text-emerald-100/80">Regain {mask(740)} this month by optimizing leaks.</p>
+      {(() => {
+        // Calculate total potential savings from pending Lex actions
+        const totalSavings = pendingActions.reduce((sum, action) => sum + (action.amount || 0), 0) || 740; // Fallback to 740 if zero/empty to maintain UI preview
+        
+        return (
+          <div 
+            onClick={() => {
+              setLexTargetBucket('action');
+              onNavigate('insights');
+            }}
+            className="bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/10 p-7 rounded-[40px] flex items-center justify-between group active:scale-95 transition-all cursor-pointer"
+          >
+            <div className="flex items-center gap-6">
+              <div className="bg-white dark:bg-premium-dark p-4 rounded-2xl shadow-sm text-emerald-500"><TrendingUp size={24} /></div>
+              <div>
+                <h4 className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-[0.2em] mb-1 leading-none">RECOVERY MODE</h4>
+                <p className="text-xs font-bold text-emerald-900 dark:text-emerald-100/80">You have the potential to regain {mask(totalSavings)} this month by optimizing identified spending leaks.</p>
+              </div>
+            </div>
+            <div className="bg-emerald-100 dark:bg-emerald-500/20 p-2.5 rounded-full text-emerald-600 dark:text-emerald-400 group-hover:translate-x-1 transition-transform">
+              <ChevronRight size={18} />
+            </div>
           </div>
-        </div>
-        <div className="bg-emerald-100 dark:bg-emerald-500/20 p-2.5 rounded-full text-emerald-600 dark:text-emerald-400 group-hover:translate-x-1 transition-transform">
-          <ChevronRight size={18} />
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Refined Wealth Accelerator Section */}
-      <section className="space-y-4">
+      <section id="wealth-accelerator-section" className="space-y-4">
         <div className="flex justify-between items-center px-1">
           <div className="flex items-center gap-2">
             <h3 className="text-slate-900 dark:text-premium-text font-black text-[10px] uppercase tracking-[0.2em]">Wealth Accelerator</h3>

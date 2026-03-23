@@ -84,7 +84,7 @@ async def chat_with_bot(request: ChatRequest, user=Depends(get_current_user)):
         while clean_lines and not clean_lines[-1].strip():
             clean_lines.pop()
 
-        return {"reply": "\n".join(clean_lines), "suggestions": suggestions[:3]}
+        return {"reply": "\n".join(clean_lines), "suggestions": [suggestions[i] for i in range(min(3, len(suggestions)))]}
 
     except HTTPException:
         raise

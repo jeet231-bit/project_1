@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import time
 
 load_dotenv()
-from .routers import subscriptions, expenses, dashboard, insights, actions, conversations, capital, commitments, onboarding, bank_accounts, export, chatbot
+from .routers import subscriptions, expenses, dashboard, insights, actions, conversations, capital, commitments, onboarding, bank_accounts, export, chatbot, budgets
 
 app = FastAPI(
     title="spndwisee API",
@@ -18,6 +18,12 @@ origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
+
+# Allow deployed frontend origin via env var (e.g. https://your-app.vercel.app)
+import os
+_extra_origin = os.environ.get("FRONTEND_URL")
+if _extra_origin:
+    origins.append(_extra_origin)
 
 app.add_middleware(
     CORSMiddleware,
@@ -48,6 +54,7 @@ app.include_router(onboarding.router, prefix="/onboarding", tags=["onboarding"])
 app.include_router(bank_accounts.router, prefix="/bank-accounts", tags=["bank-accounts"])
 app.include_router(export.router, prefix="/export", tags=["export"])
 app.include_router(chatbot.router, prefix="/chatbot", tags=["chatbot"])
+app.include_router(budgets.router, prefix="/budgets", tags=["budgets"])
 
 @app.get("/")
 def read_root():

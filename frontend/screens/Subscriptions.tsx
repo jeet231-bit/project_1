@@ -71,6 +71,17 @@ const SubSubscriptions: React.FC<SubsProps> = ({ onViewDetail }) => {
   const { subscriptions, renewSubscription, addSubscription, theme } = useApp();
   const [view, setView] = useState<'active' | 'cancelled'>('active');
   const [showAdd, setShowAdd] = useState(false);
+  const [leftOffset, setLeftOffset] = useState('24px');
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      const offset = Math.max(24, (window.innerWidth / 2) - 210);
+      setLeftOffset(`${offset}px`);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Add subscription form state
   const [newName, setNewName] = useState('');
@@ -209,7 +220,7 @@ const SubSubscriptions: React.FC<SubsProps> = ({ onViewDetail }) => {
       <header className="flex justify-between items-center">
         <h1 className="text-2xl font-black text-slate-900 dark:text-premium-text tracking-tight">SubX Portfolio</h1>
         <div className="flex gap-2">
-          <div className="w-9 h-9 bg-white dark:bg-premium-card rounded-full border border-slate-100 dark:border-white/5 flex items-center justify-center text-slate-400"><ChevronUp size={18} /></div>
+          <button onClick={() => setShowAdd(true)} className="w-9 h-9 bg-white dark:bg-premium-card rounded-full border border-slate-100 dark:border-white/5 flex items-center justify-center text-slate-800 dark:text-white transition-colors active:scale-95"><Plus size={18} /></button>
           <div className="w-9 h-9 bg-[#0f172a] dark:bg-premium-card rounded-full flex items-center justify-center text-white"><User size={18} /></div>
         </div>
       </header>
@@ -232,16 +243,12 @@ const SubSubscriptions: React.FC<SubsProps> = ({ onViewDetail }) => {
         </AnimatePresence>
       </div>
 
-      <motion.button onClick={() => setShowAdd(true)} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="fixed bottom-24 right-6 w-14 h-14 bg-[#0f172a] dark:bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center z-40 transition-colors">
-        <Plus size={28} />
-      </motion.button>
-
       {/* Add Subscription Modal */}
       <AnimatePresence>
         {showAdd && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 backdrop-blur-sm"
             onClick={() => setShowAdd(false)}
           >
             <motion.div

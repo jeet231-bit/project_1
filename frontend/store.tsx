@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { api, supabase } from './src/lib/api';
 import { 
-  Subscription, Expense, Goal, EMI, CashBalance, BankAccount,
+  Subscription, Expense, Goal, EMI, CashBalance, BankAccount, CategoryBudget,
   SubscriptionStatus, BillingCycle, PaymentMethod, GoalType, Friend, SharedExpense,
   LexMessage, LexBucket, LexAction, ActionResult, ModelTier, ProactiveAlert, MaturityForecast
 } from './types';
@@ -16,6 +16,7 @@ interface AppState {
   goals: Goal[];
   emis: EMI[];
   bankAccounts: BankAccount[];
+  budgets: CategoryBudget[];
   cashBalance: CashBalance;
   friends: Friend[];
   sharedExpenses: SharedExpense[];
@@ -24,6 +25,7 @@ interface AppState {
   lexHistory: LexMessage[];
   lexTargetBucket: LexBucket | null;
   pendingActions: LexAction[];
+  pastActions: LexAction[];
   actionResults: ActionResult[];
   conversationId: string | null;
   modelTier: ModelTier;
@@ -33,6 +35,7 @@ interface AppState {
   clearLexSession: () => void;
   setPendingActions: (actions: LexAction[]) => void;
   appendPendingActions: (actions: LexAction[]) => void;
+  addPastActions: (actions: LexAction[]) => void;
   clearPendingActions: () => void;
   setActionResults: (results: ActionResult[]) => void;
   setConversationId: (id: string | null) => void;
@@ -50,10 +53,12 @@ interface AppState {
   setSubscriptions: (subs: Subscription[]) => void;
   setExpenses: (exps: Expense[]) => void;
   setBankAccounts: (accounts: BankAccount[]) => void;
+  setBudgets: (budgets: CategoryBudget[]) => void;
   setEmis: (emis: EMI[]) => void;
   addSubscription: (sub: Omit<Subscription, 'id' | 'createdAt'>) => void;
   cancelSubscription: (id: string) => void;
   renewSubscription: (id: string) => void;
+  updateSubscription: (id: string, updates: Partial<Subscription>) => void;
   addExpense: (exp: Omit<Expense, 'id'>) => void;
   updateGoal: (id: string, amount: number) => void;
   updateCashBalance: (amount: number) => void;
@@ -98,6 +103,13 @@ const mapBankAccount = (raw: any): BankAccount => ({
   lastFour: raw.last_four || '',
 });
 
+const mapBudget = (raw: any): CategoryBudget => ({
+  id: String(raw.id),
+  category: raw.category || '',
+  monthlyLimit: raw.monthly_limit || 0,
+  createdAt: raw.created_at || '',
+});
+
 const MOCK_FRIENDS: Friend[] = [
   { id: 'f1', name: 'Varun', balance: 1250 },
   { id: 'f2', name: 'Rohan', balance: -450 },
@@ -124,6 +136,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     { id: 'emi2', name: 'Phone EMI', monthlyAmount: 3400, dueDate: '2026-04-10' },
   ]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
+  const [budgets, setBudgets] = useState<CategoryBudget[]>([]);
   const [friends, setFriends] = useState<Friend[]>(MOCK_FRIENDS);
   const [sharedExpenses, setSharedExpenses] = useState<SharedExpense[]>(MOCK_SHARED_EXPENSES);
   const [cashBalance, setCashBalance] = useState<CashBalance>({ openingBalance: 0, currentBalance: 0 });
@@ -134,18 +147,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         // Get user's display name from Supabase
         const { data: { user } } = await supabase.auth.getUser();
-        if (user?.email) {
-          // Always extract first name from email (dot-separated) for cleaner display
-          const emailFirstName = user.email.split('@')[0].split('.')[0];
-          const displayName = emailFirstName.charAt(0).toUpperCase() + emailFirstName.slice(1).toLowerCase();
-          setUserName(displayName);
+        if (user) {
+          if (user.user_metadata && user.user_metadata.name) {
+            setUserName(user.user_metadata.name);
+          } else if (user.email) {
+            // Fallback for old accounts
+            const emailFirstName = user.email.split('@')[0].split('.')[0];
+            const displayName = emailFirstName.charAt(0).toUpperCase() + emailFirstName.slice(1).toLowerCase();
+            setUserName(displayName);
+          }
         }
 
         // Fetch all real data in parallel (allSettled so one failure doesn't block others)
-        const [subsRes, expRes, bankRes] = await Promise.allSettled([
+        const [subsRes, expRes, bankRes, budgetRes] = await Promise.allSettled([
           api.get('/subscriptions'),
           api.get('/expenses'),
           api.get('/bank-accounts'),
+          api.get('/budgets'),
         ]);
 
         // Map backend data → frontend types (log failures explicitly)
@@ -199,6 +217,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           console.error('DEBUG: Failed to fetch bank accounts:', bankRes.reason);
         }
 
+        if (budgetRes.status === 'fulfilled' && Array.isArray(budgetRes.value)) {
+          setBudgets(budgetRes.value.map(mapBudget));
+          console.log('DEBUG: Loaded', budgetRes.value.length, 'budgets');
+        } else if (budgetRes.status === 'rejected') {
+          console.error('DEBUG: Failed to fetch budgets:', budgetRes.reason);
+        }
+
         setDataLoaded(true);
       } catch (err) {
         console.warn('DEBUG: Failed to load user data, using empty state:', err);
@@ -221,8 +246,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Action execution state
   const [pendingActions, setPendingActions] = useState<LexAction[]>([]);
+  const [pastActions, setPastActions] = useState<LexAction[]>([]);
   const [actionResults, setActionResults] = useState<ActionResult[]>([]);
   const appendPendingActions = useCallback((actions: LexAction[]) => setPendingActions(prev => [...prev, ...actions]), []);
+  const addPastActions = useCallback((actions: LexAction[]) => setPastActions(prev => [...prev, ...actions]), []);
   const clearPendingActions = useCallback(() => { setPendingActions([]); setActionResults([]); }, []);
 
   // Proactive Intelligence state (Phase 4)
@@ -270,6 +297,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSubscriptions(prev => prev.map(s => s.id === id ? { ...s, status: SubscriptionStatus.ACTIVE } : s));
   }, []);
 
+  const updateSubscription = useCallback((id: string, updates: Partial<Subscription>) => {
+    setSubscriptions(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+  }, []);
+
   const addExpense = useCallback((exp: Omit<Expense, 'id'>) => {
     const newExp: Expense = { ...exp, id: Math.random().toString(36).substr(2, 9) };
     setExpenses(prev => [newExp, ...prev]);
@@ -298,15 +329,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{ 
-      userName, theme, setTheme, isSecureMode, toggleSecureMode, subscriptions, expenses, goals, emis, cashBalance, bankAccounts,
-      friends, sharedExpenses, dataLoaded, lexHistory, lexTargetBucket, pendingActions, actionResults,
+      userName, theme, setTheme, isSecureMode, toggleSecureMode, subscriptions, expenses, goals, emis, cashBalance, bankAccounts, budgets,
+      friends, sharedExpenses, dataLoaded, lexHistory, lexTargetBucket, pendingActions, pastActions, actionResults,
       conversationId, modelTier,
       setLexHistory, appendLexMessages, setLexTargetBucket, clearLexSession,
-      setPendingActions, appendPendingActions, clearPendingActions, setActionResults,
+      setPendingActions, appendPendingActions, addPastActions, clearPendingActions, setActionResults,
       setConversationId, setModelTier,
       proactiveAlerts, maturityForecast, setProactiveAlerts, setMaturityForecast, dismissAlert, isAlertDismissedToday, markAlertRead,
-      setSubscriptions, setExpenses, setBankAccounts, setEmis,
-      addSubscription, cancelSubscription, renewSubscription, addExpense, updateGoal, updateCashBalance,
+      setSubscriptions, setExpenses, setBankAccounts, setBudgets, setEmis,
+      addSubscription, cancelSubscription, renewSubscription, updateSubscription, addExpense, updateGoal, updateCashBalance,
       addSharedExpense, settleWithFriend
     }}>
       {children}

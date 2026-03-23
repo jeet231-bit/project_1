@@ -16,7 +16,7 @@ interface Props {
 }
 
 const SubscriptionDetail: React.FC<Props> = ({ subId, onBack }) => {
-  const { subscriptions, cancelSubscription } = useApp();
+  const { subscriptions, cancelSubscription, updateSubscription } = useApp();
   const sub = subscriptions.find(s => s.id === subId);
   
   const [remindersDay, setRemindersDay] = useState(3);
@@ -169,12 +169,21 @@ const SubscriptionDetail: React.FC<Props> = ({ subId, onBack }) => {
           </p>
         </div>
 
-        <button 
-          onClick={() => { cancelSubscription(sub.id); onBack(); }}
-          className="w-full bg-[#0f172a] dark:bg-zinc-100 text-white dark:text-[#0f172a] py-6 rounded-[32px] font-black text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-4 active:scale-95 transition-all shadow-xl"
-        >
-          <CircleAlert size={18} className="rotate-45" /> Cancel Commitment
-        </button>
+        <div className="flex flex-col gap-4">
+          <button 
+            onClick={() => { updateSubscription(sub.id, { autoPay }); onBack(); }}
+            className="w-full bg-indigo-600 dark:bg-indigo-500 text-white py-6 rounded-[32px] font-black text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-4 active:scale-95 transition-all shadow-xl"
+          >
+            Save Settings
+          </button>
+          
+          <button 
+            onClick={() => { cancelSubscription(sub.id); onBack(); }}
+            className="w-full bg-[#0f172a] dark:bg-zinc-100 text-white dark:text-[#0f172a] py-6 rounded-[32px] font-black text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-4 active:scale-95 transition-all shadow-xl"
+          >
+            <CircleAlert size={18} className="rotate-45" /> Cancel Commitment
+          </button>
+        </div>
       </div>
     </div>
   );

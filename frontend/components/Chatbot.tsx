@@ -5,29 +5,19 @@ import { X, Send, Mic, Sparkles, MessageSquare, Image as ImageIcon, MoreVertical
 import { api } from '../src/lib/api';
 import { useApp } from '../store';
 
-/* ── Inline Robot SVG (guaranteed to render) ── */
+import RoboIconUrl from './assets/logo-sym.svg';
+
+/* ── Brand Logo Icon ── */
 const RoboIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-    <circle cx="32" cy="32" r="28" fill="url(#rg)" opacity="0.15"/>
-    <rect x="14" y="20" rx="14" width="36" height="26" fill="#1a1a2e"/>
-    <rect x="14" y="20" rx="14" width="36" height="26" fill="url(#rb)" fillOpacity="0.3"/>
-    <rect x="22" y="28" rx="3" width="7" height="10" fill="white"/>
-    <rect x="35" y="28" rx="3" width="7" height="10" fill="white"/>
-    <path d="M20 20 Q32 8 44 20" stroke="url(#ra)" strokeWidth="3" fill="none" strokeLinecap="round"/>
-    <defs>
-      <linearGradient id="rg" x1="0" y1="0" x2="64" y2="64"><stop stopColor="#00f5d4"/><stop offset="1" stopColor="#7b61ff"/></linearGradient>
-      <linearGradient id="rb" x1="14" y1="20" x2="50" y2="46"><stop stopColor="#00f5d4"/><stop offset="1" stopColor="#f72585"/></linearGradient>
-      <linearGradient id="ra" x1="20" y1="8" x2="44" y2="20"><stop stopColor="#00f5d4"/><stop offset="0.5" stopColor="#7b61ff"/><stop offset="1" stopColor="#f72585"/></linearGradient>
-    </defs>
-  </svg>
+  <img src={RoboIconUrl} width={size} height={size} alt="Spndwisee Support Bot" style={{ objectFit: 'contain' }} />
 );
 
 /* ── Brand colors (indigo/blue from app's design system) ── */
 const C = {
-  bg:   '#0E1116',
+  bg: '#0E1116',
   card: '#161A22',
   text: '#E6EAF0',
-  muted:'#9AA3B2',
+  muted: '#9AA3B2',
   accent: '#4f46e5',       // indigo-600
   accentLight: '#6366f1',  // indigo-500
   accentBlue: '#2563eb',   // blue-600
@@ -48,6 +38,47 @@ const Chatbot: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [showFab, setShowFab] = useState(false);
+  const timerRef = useRef<any>(null);
+  const fabShownRef = useRef(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const threshold = Math.max(0, maxScroll * 0.8);
+
+      const isShortPage = maxScroll <= 50;
+      const isPast80 = window.scrollY >= threshold;
+
+      if (isShortPage || isPast80) {
+        if (!fabShownRef.current && !timerRef.current) {
+          timerRef.current = setTimeout(() => {
+            setShowFab(true);
+            fabShownRef.current = true;
+            timerRef.current = null;
+          }, 2000);
+        }
+      } else {
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
+        }
+        if (fabShownRef.current) {
+          setShowFab(false);
+          fabShownRef.current = false;
+        }
+      }
+    };
+
+    // Delay initial check to allow DOM to render
+    const initialTimer = setTimeout(handleScroll, 300);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      clearTimeout(initialTimer);
+      window.removeEventListener('scroll', handleScroll);
+      if (timerRef.current) clearTimeout(timerRef.current);
+    }
+  }, []);
 
   useEffect(() => {
     // Delay scroll to ensure suggestion chips are rendered in the DOM first
@@ -132,24 +163,50 @@ const Chatbot: React.FC = () => {
     <>
       {/* ── FAB ── */}
       <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            key="fab"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
-            onClick={() => setIsOpen(true)}
+        {!isOpen && showFab && (
+          <div
             style={{
-              position: 'fixed', bottom: '7.5rem',
-              right: `max(1.2rem, calc(50% - 210px))`,
-              width: 52, height: 52, borderRadius: '50%',
-              background: `linear-gradient(135deg, ${C.accentBlue}, ${C.accent})`, boxShadow: `0 8px 30px ${C.accent}40`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: 'none', cursor: 'pointer', zIndex: 9998,
+              position: 'fixed', bottom: '175px', left: '50%', transform: 'translateX(-50%)',
+              width: '92%', maxWidth: '384px', pointerEvents: 'none',
+              zIndex: 9998,
             }}
           >
-            <RoboIcon size={30} />
-          </motion.button>
+            <motion.div
+              key="fab-container"
+              initial={{ opacity: 0, y: 20, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.8 }}
+              transition={{ duration: 0.5, type: 'spring' }}
+              className="absolute right-0 pointer-events-auto"
+            >
+              <div className="relative flex flex-col items-center justify-center group pointer-events-auto">
+
+                {/* TOOLTIP PILL */}
+                <span
+                  className="absolute bottom-[80px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-40"
+                  style={{
+                    color: C.text, fontSize: 13, fontWeight: 500, background: 'rgba(0,0,0,0.8)',
+                    padding: '8px 16px', borderRadius: 20, backdropFilter: 'blur(12px)',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+                    border: '1px solid rgba(255,255,255,0.1)'
+                  }}
+                >
+                  💬 Need help with something?
+                </span>
+
+                <motion.button
+                  onClick={(e) => { e.stopPropagation(); setIsOpen(true); }}
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+                  className="flex items-center justify-center bg-transparent border-none cursor-pointer p-0 focus:outline-none relative z-50 pointer-events-auto"
+                >
+                  <div style={{ width: 64, height: 64 }} className="pointer-events-none">
+                    <RoboIcon size={64} />
+                  </div>
+                </motion.button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
@@ -176,8 +233,8 @@ const Chatbot: React.FC = () => {
                 <div style={{ position: 'absolute', top: '-25%', left: '-15%', width: '70%', height: '50%', borderRadius: '50%', filter: 'blur(100px)', opacity: 0.12, background: `radial-gradient(circle, ${C.accentLight} 0%, transparent 70%)` }} />
                 {/* Topography lines */}
                 <svg style={{ position: 'absolute', top: -10, right: -10, opacity: 0.06 }} width="260" height="260" viewBox="0 0 100 100" fill="none" strokeWidth="0.4" stroke="white">
-                  <path d="M10 20Q50 80 90 20M10 30Q50 90 90 30M10 40Q50 100 90 40M10 50Q50 110 90 50"/>
-                  <path d="M20 10Q80 50 20 90M30 10Q90 50 30 90M40 10Q100 50 40 90"/>
+                  <path d="M10 20Q50 80 90 20M10 30Q50 90 90 30M10 40Q50 100 90 40M10 50Q50 110 90 50" />
+                  <path d="M20 10Q80 50 20 90M30 10Q90 50 30 90M40 10Q100 50 40 90" />
                 </svg>
               </div>
 

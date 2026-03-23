@@ -111,7 +111,7 @@ def recommend_actions(user=Depends(get_current_user), db=Depends(get_db)):
         traceback.print_exc()
 
     # Return at most 3 actions
-    return {"status": "ok", "actions": actions[:3]}
+    return {"status": "ok", "actions": [actions[i] for i in range(min(3, len(actions)))]}
 
 
 @router.post("/execute")
@@ -167,16 +167,30 @@ async def execute_actions(
                     results.append({"label": label, "status": "failed", "reason": "Missing category or new_limit"})
                     continue
 
-                # Upsert into category_budgets table
                 response = (
                     db.table("category_budgets")
                     .upsert(
-                        {"user_id": user_id, "category": category, "monthly_limit": new_limit},
+                        {
+                            "user_id": user_id,
+                            "category": category,
+                            "monthly_limit": float(new_limit),
+                        },
                         on_conflict="user_id,category",
                     )
                     .execute()
                 )
-                results.append({"label": label, "status": "success", "detail": f"Budget for '{category}' set to ₹{new_limit}."})
+                if response.data:
+                    results.append({
+                        "label": label,
+                        "status": "success",
+                        "detail": f"Budget for '{category}' set to ₹{new_limit}.",
+                    })
+                else:
+                    results.append({
+                        "label": label,
+                        "status": "failed",
+                        "reason": "Failed to save category budget.",
+                    })
 
             elif action_type == "switch_plan":
                 sub_id = meta.get("subscription_id")

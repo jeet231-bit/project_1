@@ -11,6 +11,7 @@ interface LoginScreenProps {
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ onBack, defaultMode = 'login' }) => {
     const [isLogin, setIsLogin] = useState(defaultMode === 'login');
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -45,6 +46,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onBack, defaultMode = 'login'
                 const { error } = await supabase.auth.signUp({
                     email,
                     password,
+                    options: {
+                        data: { name }
+                    }
                 });
                 if (error) throw error;
             }
@@ -84,6 +88,29 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onBack, defaultMode = 'login'
                 </div>
 
                 <form onSubmit={handleAuth} className="space-y-4">
+                    {!isLogin && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="space-y-2 mb-4"
+                        >
+                            <label className="text-sm font-medium text-slate-300">Name</label>
+                            <div className="relative">
+                                {/* Using an inline SVG for user icon since it wasn't imported */}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                <input
+                                    type="text"
+                                    required={!isLogin}
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    placeholder="Your Name"
+                                />
+                            </div>
+                        </motion.div>
+                    )}
+
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-300">Email</label>
                         <div className="relative">

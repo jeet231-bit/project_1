@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+export const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 console.log('DEBUG: Supabase Config:', {
     url: supabaseUrl,
@@ -50,7 +50,7 @@ export const api = {
             ...options.headers,
         };
 
-        const finalUrl = `http://localhost:8000${endpoint}`;
+        const finalUrl = `${apiUrl}${endpoint}`;
         console.log(`DEBUG: API Fetching from ${finalUrl}`, { hasToken: !!token });
 
         try {

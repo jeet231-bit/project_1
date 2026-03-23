@@ -12,6 +12,7 @@ import EMIScreen from './screens/EMIScreen';
 import CategoryLogs from './screens/CategoryLogs';
 import SubscriptionDetail from './screens/SubscriptionDetail';
 import SplitScreen from './screens/SplitScreen';
+import BudgetScreen from './screens/BudgetScreen';
 import LoginScreen from './screens/LoginScreen';
 import UpdatePasswordScreen from './screens/UpdatePasswordScreen';
 import LandingScreen from './screens/LandingScreen';
@@ -22,7 +23,7 @@ import Chatbot from './components/Chatbot';
 // ── Flow stages ────────────────────────────────────────────────
 // landing → login → signup → onboarding → insightReveal → app (main dashboard)
 type FlowStage = 'loading' | 'landing' | 'login' | 'signup' | 'onboarding' | 'insightReveal' | 'app' | 'recovery';
-type Screen = 'home' | 'subs' | 'expenses' | 'split' | 'insights' | 'settings' | 'emis' | 'categoryLogs' | 'subDetail';
+type Screen = 'home' | 'subs' | 'expenses' | 'split' | 'insights' | 'settings' | 'emis' | 'categoryLogs' | 'subDetail' | 'budgets';
 
 const App: React.FC = () => {
   const [stage, setStage] = useState<FlowStage>('loading');
@@ -103,6 +104,14 @@ const App: React.FC = () => {
     setStage('onboarding');
   };
 
+  // ── Scroll to top on screen change ────────────────────────────
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    const el = document.getElementById('app-scroll-container');
+    if (el) el.scrollTop = 0;
+  }, [activeTab]);
+
   // ── Navigation helpers ───────────────────────────────────────
   const navigateToSubDetail = (id: string) => {
     setSelectedSubId(id);
@@ -122,6 +131,7 @@ const App: React.FC = () => {
       case 'insights': return <Insights onNavigate={handleNavigate} />;
       case 'settings': return <SettingsScreen />;
       case 'emis': return <EMIScreen onBack={() => setActiveTab('home')} />;
+      case 'budgets': return <BudgetScreen onBack={() => setActiveTab('home')} />;
       case 'categoryLogs': return <CategoryLogs onBack={() => setActiveTab('home')} />;
       case 'subDetail': return <SubscriptionDetail subId={selectedSubId!} onBack={() => setActiveTab('subs')} />;
       default: return <Dashboard onNavigate={handleNavigate} />;
@@ -205,7 +215,7 @@ const App: React.FC = () => {
     <>
       <AppProvider>
         <div className="flex flex-col min-h-screen max-w-md mx-auto relative bg-slate-50 dark:bg-premium-dark shadow-2xl shadow-slate-200 dark:shadow-none transition-colors">
-          <main className="flex-1 pb-32 overflow-x-hidden overflow-y-auto hide-scrollbar">
+          <main id="app-scroll-container" className="flex-1 pb-32 overflow-x-hidden overflow-y-auto hide-scrollbar">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}

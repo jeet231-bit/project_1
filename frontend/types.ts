@@ -80,6 +80,13 @@ export interface CashBalance {
   currentBalance: number;
 }
 
+export interface CategoryBudget {
+  id: string;
+  category: string;
+  monthlyLimit: number;
+  createdAt: string;
+}
+
 export interface Friend {
   id: string;
   name: string;

@@ -306,8 +306,8 @@ def reduce_financial_context(
             for s in subscriptions if s.status == 'active'
         ],
         "recent_expenses": [
-            {"name": e.name, "amount": e.amount, "category": e.category}
-            for e in expenses[-5:]  # Last 5 expenses
+            {"name": expenses[i].name, "amount": expenses[i].amount, "category": expenses[i].category}
+            for i in range(max(0, len(expenses) - 5), len(expenses))
         ],
     }
     return context
@@ -425,13 +425,14 @@ def _build_system_prompt(context: Dict[str, Any]) -> str:
 
     # Normalise persona name to match our directive keys
     if persona:
+        persona_str = str(persona)
         for key in PERSONA_TONE_DIRECTIVES:
-            if key.lower() in persona.lower() or persona.lower() in key.lower():
+            if key.lower() in persona_str.lower() or persona_str.lower() in key.lower():
                 persona = key
                 break
         else:
             # If LLM gave a creative name, try keyword matching
-            p_lower = persona.lower()
+            p_lower = persona_str.lower()
             if any(w in p_lower for w in ["impuls", "erratic", "spike"]):
                 persona = "The Impulsive"
             elif any(w in p_lower for w in ["drift", "inflat", "shift", "creep"]):
@@ -798,7 +799,9 @@ def process_lex_query(
             conversation_history=conversation_history,
             model=chosen_model,
         )
-        print(f"[LEX] Response received ({chosen_model}): {str(data.get('text', ''))[:80]}…")
+        text_val = str(data.get('text', ''))
+        short_text = "".join(text_val[i] for i in range(min(80, len(text_val))))
+        print(f"[LEX] Response received ({chosen_model}): {short_text}…")
 
         # Ensure required keys always exist
         data.setdefault("text", "I've analysed your financial velocity.")
