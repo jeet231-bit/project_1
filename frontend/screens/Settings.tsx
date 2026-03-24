@@ -10,7 +10,7 @@ import { api, apiUrl, supabase, signOutExplicitly } from '../src/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Settings: React.FC = () => {
-  const { userName, subscriptions, expenses, bankAccounts } = useApp();
+  const { userName, userEmail, subscriptions, expenses, bankAccounts } = useApp();
   const [notifs, setNotifs] = useState(true);
 
   // Export Vault state
@@ -160,6 +160,7 @@ const Settings: React.FC = () => {
         </div>
         <div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-50 tracking-tight">{userName}</h1>
+          {userEmail && <p className="text-xs text-slate-400 font-medium mt-0.5">{userEmail}</p>}
           <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Premium Member</p>
         </div>
       </div>

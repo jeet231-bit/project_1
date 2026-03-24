@@ -16,9 +16,11 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
-  const { userName, theme, setTheme, isSecureMode, toggleSecureMode, subscriptions, expenses, emis, goals, bankAccounts, setBankAccounts, budgets, updateGoal, appendLexMessages, setLexTargetBucket, appendPendingActions, pendingActions, conversationId, setConversationId, modelTier, proactiveAlerts, setProactiveAlerts, maturityForecast, setMaturityForecast, dismissAlert, isAlertDismissedToday, markAlertRead } = useApp();
+  const { userName, theme, setTheme, isSecureMode, toggleSecureMode, subscriptions, expenses, emis, goals, bankAccounts, setBankAccounts, budgets, updateGoal, cashBalance, updateCashBalance, appendLexMessages, setLexTargetBucket, appendPendingActions, pendingActions, conversationId, setConversationId, modelTier, proactiveAlerts, setProactiveAlerts, maturityForecast, setMaturityForecast, dismissAlert, isAlertDismissedToday, markAlertRead } = useApp();
   const [isEditingGoal, setIsEditingGoal] = useState(false);
   const [newGoalVal, setNewGoalVal] = useState('');
+  const [isEditingCash, setIsEditingCash] = useState(false);
+  const [cashEditVal, setCashEditVal] = useState('');
   const [velocityFilter, setVelocityFilter] = useState<'Weekly' | 'Monthly'>('Weekly');
   const [showExplainer, setShowExplainer] = useState<string | null>(null);
   const [showAddBank, setShowAddBank] = useState(false);
@@ -123,6 +125,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   useEffect(() => {
     const fetchProactiveIntelligence = async () => {
       try {
+        // Ensure a maturity snapshot exists (needed for alerts & forecast)
+        // This is throttled server-side to 1 per 23h, so safe to call every mount
+        await api.post('/insights/maturity-snapshot', {}).catch(() => {});
+
         // Trigger alert detection (compares snapshots, generates new alerts)
         const checkResult = await api.post('/insights/alerts/check', {});
         if (checkResult?.alerts?.length > 0) {
@@ -337,123 +343,163 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         </div>
       </header>
 
-      {/* Proactive Intelligence Alerts (Phase 4) */}
-      <AnimatePresence>
-        {proactiveAlerts.filter(a => !a.is_dismissed).length > 0 && (
-          <motion.section
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="space-y-3"
-          >
-            <div className="flex items-center gap-2 px-1">
-              <Bell size={12} className="text-amber-500" />
-              <h3 className="text-[10px] font-black text-slate-900 dark:text-premium-text uppercase tracking-[0.2em]">
-                Proactive Alerts
-              </h3>
-              <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-[9px] font-black px-2 py-0.5 rounded-full">
-                {proactiveAlerts.filter(a => !a.is_dismissed).length}
-              </span>
-            </div>
+      {/* Proactive Intelligence Section (Phase 4) */}
+      <section className="space-y-3">
+        {/* Alerts */}
+        <AnimatePresence>
+          {proactiveAlerts.filter(a => !a.is_dismissed).length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-3"
+            >
+              <div className="flex items-center gap-2 px-1">
+                <Bell size={12} className="text-amber-500" />
+                <h3 className="text-[10px] font-black text-slate-900 dark:text-premium-text uppercase tracking-[0.2em]">
+                  Proactive Alerts
+                </h3>
+                <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-[9px] font-black px-2 py-0.5 rounded-full">
+                  {proactiveAlerts.filter(a => !a.is_dismissed).length}
+                </span>
+              </div>
 
-            <div className="space-y-2">
-              {proactiveAlerts.filter(a => !a.is_dismissed).slice(0, 3).map((alert) => {
-                const severityConfig: Record<AlertSeverity, { bg: string; border: string; icon: string; text: string; badge: string }> = {
-                  critical: { bg: 'bg-rose-50 dark:bg-rose-500/5', border: 'border-rose-200 dark:border-rose-500/20', icon: 'text-rose-500', text: 'text-rose-800 dark:text-rose-300', badge: 'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400' },
-                  warning: { bg: 'bg-amber-50 dark:bg-amber-500/5', border: 'border-amber-200 dark:border-amber-500/20', icon: 'text-amber-500', text: 'text-amber-800 dark:text-amber-300', badge: 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' },
-                  info: { bg: 'bg-emerald-50 dark:bg-emerald-500/5', border: 'border-emerald-200 dark:border-emerald-500/20', icon: 'text-emerald-500', text: 'text-emerald-800 dark:text-emerald-300', badge: 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' },
-                };
-                const sc = severityConfig[alert.severity] || severityConfig.info;
+              <div className="space-y-2">
+                {proactiveAlerts.filter(a => !a.is_dismissed).slice(0, 3).map((alert) => {
+                  const severityConfig: Record<AlertSeverity, { bg: string; border: string; icon: string; text: string; badge: string }> = {
+                    critical: { bg: 'bg-rose-50 dark:bg-rose-500/5', border: 'border-rose-200 dark:border-rose-500/20', icon: 'text-rose-500', text: 'text-rose-800 dark:text-rose-300', badge: 'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400' },
+                    warning: { bg: 'bg-amber-50 dark:bg-amber-500/5', border: 'border-amber-200 dark:border-amber-500/20', icon: 'text-amber-500', text: 'text-amber-800 dark:text-amber-300', badge: 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' },
+                    info: { bg: 'bg-emerald-50 dark:bg-emerald-500/5', border: 'border-emerald-200 dark:border-emerald-500/20', icon: 'text-emerald-500', text: 'text-emerald-800 dark:text-emerald-300', badge: 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' },
+                  };
+                  const sc = severityConfig[alert.severity] || severityConfig.info;
 
-                return (
-                  <motion.div
-                    key={alert.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20, height: 0 }}
-                    className={`${sc.bg} border ${sc.border} p-5 rounded-[28px] relative group transition-all text-left`}
-                  >
-                    <button
-                      onClick={() => handleDismissAlert(alert.id)}
-                      className="absolute top-3 right-3 p-1.5 rounded-xl opacity-0 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+                  return (
+                    <motion.div
+                      key={alert.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20, height: 0 }}
+                      className={`${sc.bg} border ${sc.border} p-5 rounded-[28px] relative group transition-all text-left`}
                     >
-                      <X size={12} className="text-slate-400" />
-                    </button>
+                      <button
+                        onClick={() => handleDismissAlert(alert.id)}
+                        className="absolute top-3 right-3 p-1.5 rounded-xl opacity-0 group-hover:opacity-100 group-active:opacity-100 hover:bg-black/5 dark:hover:bg-white/5 active:bg-black/5 dark:active:bg-white/5 transition-all"
+                      >
+                        <X size={12} className="text-slate-400" />
+                      </button>
 
-                    <div className="flex items-start gap-4">
-                      <div className={`mt-0.5 ${sc.icon}`}>
-                        {alert.severity === 'critical' ? <ShieldAlert size={20} /> :
-                         alert.severity === 'warning' ? <AlertTriangle size={20} /> :
-                         <TrendingUp size={20} />}
-                      </div>
-                      <div className="flex-1 space-y-2 text-left">
-                        <div className="flex items-center gap-2 justify-start">
-                          <span className={`text-[9px] font-black uppercase tracking-widest ${sc.badge} px-2 py-0.5 rounded-full`}>
-                            {alert.severity}
-                          </span>
-                          <h4 className={`text-xs font-bold ${sc.text}`}>{alert.title}</h4>
+                      <div className="flex items-start gap-4">
+                        <div className={`mt-0.5 ${sc.icon}`}>
+                          {alert.severity === 'critical' ? <ShieldAlert size={20} /> :
+                           alert.severity === 'warning' ? <AlertTriangle size={20} /> :
+                           <TrendingUp size={20} />}
                         </div>
-                        <p className="text-[11px] font-medium text-slate-600 dark:text-premium-muted leading-relaxed text-left">
-                          {alert.message}
-                        </p>
-                        {alert.suggested_action && (
-                          <button
-                            onClick={() => {
-                              handleMarkAlertRead(alert.id);
-                              onNavigate('insights');
-                            }}
-                            className="flex items-center gap-1.5 justify-start text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-1 text-left hover:underline"
-                          >
-                            {alert.suggested_action} <ArrowRight size={10} />
-                          </button>
-                        )}
+                        <div className="flex-1 space-y-2 text-left">
+                          <div className="flex items-center gap-2 justify-start">
+                            <span className={`text-[9px] font-black uppercase tracking-widest ${sc.badge} px-2 py-0.5 rounded-full`}>
+                              {alert.severity}
+                            </span>
+                            <h4 className={`text-xs font-bold ${sc.text}`}>{alert.title}</h4>
+                          </div>
+                          <p className="text-[11px] font-medium text-slate-600 dark:text-premium-muted leading-relaxed text-left">
+                            {alert.message}
+                          </p>
+                          {alert.suggested_action && (
+                            <button
+                              onClick={() => {
+                                handleMarkAlertRead(alert.id);
+                                onNavigate('insights');
+                              }}
+                              className="flex items-center gap-1.5 justify-start text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-1 text-left hover:underline"
+                            >
+                              {alert.suggested_action} <ArrowRight size={10} />
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-            {/* Maturity Forecast Mini Card */}
-            {maturityForecast && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`p-5 rounded-[28px] border ${
-                  maturityForecast.trajectory === 'improving'
-                    ? 'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/20'
-                    : maturityForecast.trajectory === 'declining'
-                    ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/20'
-                    : 'bg-slate-50 dark:bg-slate-500/5 border-slate-200 dark:border-white/10'
-                }`}
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-2xl ${
-                    maturityForecast.trajectory === 'improving'
-                      ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600'
-                      : maturityForecast.trajectory === 'declining'
-                      ? 'bg-rose-100 dark:bg-rose-500/10 text-rose-600'
-                      : 'bg-slate-100 dark:bg-slate-500/10 text-slate-600'
-                  }`}>
-                    {maturityForecast.trajectory === 'declining' ? <TrendingDown size={20} /> : <TrendingUp size={20} />}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-premium-muted mb-0.5">
-                      Maturity Forecast
-                    </p>
-                    <p className="text-sm font-bold text-slate-900 dark:text-premium-text">
-                      {maturityForecast.trajectory_label} — {maturityForecast.current_score} → {maturityForecast.predictions[maturityForecast.predictions.length - 1]}
-                    </p>
-                    <p className="text-[10px] font-medium text-slate-500 dark:text-premium-muted">
-                      {maturityForecast.confidence} confidence • {maturityForecast.data_points_used} data points
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </motion.section>
+        {/* Maturity Forecast Mini Card — shown independently of alerts */}
+        {maturityForecast ? (() => {
+          const score = maturityForecast.current_score;
+          const projected = maturityForecast.predictions[maturityForecast.predictions.length - 1];
+          const t = maturityForecast.trajectory;
+          const headline = t === 'improving' ? 'Your financial health is improving'
+            : t === 'declining' ? 'Your financial health needs attention'
+            : 'Your financial health is holding steady';
+          const detail = t === 'improving'
+            ? `Score is trending up from ${score} toward ${projected}. Keep it going.`
+            : t === 'declining'
+            ? `Score may drop from ${score} to ${projected} if current habits continue.`
+            : score >= 60 ? `Score is steady at ${score}. You're in a good place.`
+            : `Score is steady at ${score}. Small habit changes can push this higher.`;
+          return (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`p-5 rounded-[28px] border ${
+              t === 'improving'
+                ? 'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/20'
+                : t === 'declining'
+                ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/20'
+                : 'bg-slate-50 dark:bg-slate-500/5 border-slate-200 dark:border-white/10'
+            }`}
+          >
+            <div className="flex items-center gap-4">
+              <div className={`p-3 rounded-2xl ${
+                t === 'improving'
+                  ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600'
+                  : t === 'declining'
+                  ? 'bg-rose-100 dark:bg-rose-500/10 text-rose-600'
+                  : 'bg-slate-100 dark:bg-slate-500/10 text-slate-600'
+              }`}>
+                {t === 'declining' ? <TrendingDown size={20} /> : <TrendingUp size={20} />}
+              </div>
+              <div className="flex-1">
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-premium-muted mb-0.5">
+                  Financial Health Outlook
+                </p>
+                <p className="text-sm font-bold text-slate-900 dark:text-premium-text">
+                  {headline}
+                </p>
+                <p className="text-[10px] font-medium text-slate-500 dark:text-premium-muted mt-0.5">
+                  {detail}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        );})() : (
+          /* Warming-up placeholder when no forecast data yet */
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-5 rounded-[28px] border border-indigo-100 dark:border-indigo-500/15 bg-indigo-50/50 dark:bg-indigo-500/5"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-2xl bg-indigo-100 dark:bg-indigo-500/10 text-indigo-500">
+                <Sparkles size={20} />
+              </div>
+              <div className="flex-1">
+                <p className="text-[9px] font-black uppercase tracking-widest text-indigo-400 dark:text-indigo-300/60 mb-0.5">
+                  Intelligence Warming Up
+                </p>
+                <p className="text-sm font-bold text-slate-900 dark:text-premium-text">
+                  Building your financial trajectory...
+                </p>
+                <p className="text-[10px] font-medium text-slate-500 dark:text-premium-muted mt-0.5">
+                  Spndwisee learns your patterns over time. Personalized alerts and health forecasts will appear within 1–2 days of usage.
+                </p>
+              </div>
+            </div>
+          </motion.div>
         )}
-      </AnimatePresence>
+      </section>
 
       {/* Linked Liquidity Section */}
       <section className="space-y-4">
@@ -534,20 +580,54 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         </AnimatePresence>
 
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 px-1">
+          {/* Cash Wallet card */}
+          <div className="min-w-[170px] bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 hover:border-indigo-100 dark:hover:border-indigo-900 transition-all shrink-0">
+            <div className="flex justify-between items-start">
+              <div className="w-9 h-9 rounded-2xl flex items-center justify-center text-xs bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <Wallet size={16} />
+              </div>
+              {isEditingCash ? (
+                <button
+                  onClick={() => { updateCashBalance(parseFloat(cashEditVal) || 0); setIsEditingCash(false); }}
+                  className="p-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors"
+                >
+                  <Check size={12} className="text-emerald-600 dark:text-emerald-400" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => { setIsEditingCash(true); setCashEditVal(cashBalance.currentBalance.toString()); }}
+                  className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+                >
+                  <Edit2 size={12} className="text-slate-400" />
+                </button>
+              )}
+            </div>
+            <div>
+              <p className="text-slate-400 dark:text-premium-muted/50 text-[9px] font-black uppercase tracking-widest leading-none mb-1">Cash Wallet</p>
+              {isEditingCash ? (
+                <input
+                  autoFocus
+                  type="number"
+                  value={cashEditVal}
+                  onChange={e => setCashEditVal(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') { updateCashBalance(parseFloat(cashEditVal) || 0); setIsEditingCash(false); } }}
+                  className="text-xl font-black text-slate-900 dark:text-premium-text tracking-tight bg-transparent outline-none border-b border-indigo-400 w-full"
+                />
+              ) : (
+                <p className="text-xl font-black text-slate-900 dark:text-premium-text tracking-tight">{mask(cashBalance.currentBalance)}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Bank account cards */}
           {(() => {
-            // Deduplicate bank accounts by bank name + last four digits
             const seen = new Set<string>();
-            const unique = bankAccounts.filter(acc => {
+            return bankAccounts.filter(acc => {
               const key = `${acc.bankName.toLowerCase()}-${acc.lastFour}`;
               if (seen.has(key)) return false;
               seen.add(key);
               return true;
             });
-            // Always include UPI Wallet
-            if (!unique.some(a => a.bankName === 'UPI Wallet')) {
-              unique.push({ id: 'upi-wallet', bankName: 'UPI Wallet', balance: 1250, lastFour: 'UPI', accountType: 'Digital' } as any);
-            }
-            return unique;
           })().map((acc, i) => (
             <div key={acc.id} className="min-w-[170px] bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 hover:border-indigo-100 dark:hover:border-indigo-900 transition-all shrink-0 active:scale-95">
               <div className="flex justify-between items-start">
@@ -598,7 +678,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       </section>
 
       {/* Portfolio Outflow Metrics Card */}
-      <section className="bg-[#0f172a] dark:bg-premium-card p-8 rounded-[3rem] text-white relative overflow-hidden shadow-2xl shadow-slate-300 dark:shadow-none transition-all hover:scale-[1.01]">
+      <section className="bg-[#0f172a] dark:bg-premium-card p-8 rounded-[3rem] text-white relative overflow-hidden shadow-2xl shadow-slate-300 dark:shadow-none transition-all hover:scale-[1.01] active:scale-[0.99]">
         <div className="relative z-10 flex flex-col gap-6">
           <div className="flex justify-between items-start">
             <div>

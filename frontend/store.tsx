@@ -9,6 +9,7 @@ import {
 
 interface AppState {
   userName: string;
+  userEmail: string;
   theme: 'light' | 'dark';
   isSecureMode: boolean;
   subscriptions: Subscription[];
@@ -60,6 +61,9 @@ interface AppState {
   renewSubscription: (id: string) => void;
   updateSubscription: (id: string, updates: Partial<Subscription>) => void;
   addExpense: (exp: Omit<Expense, 'id'>) => void;
+  updateExpense: (id: string, updates: Partial<Expense>) => void;
+  deleteExpense: (id: string) => void;
+  deleteSubscription: (id: string) => void;
   updateGoal: (id: string, amount: number) => void;
   updateCashBalance: (amount: number) => void;
   addSharedExpense: (exp: Omit<SharedExpense, 'id'>) => void;
@@ -125,6 +129,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [theme, setThemeState] = useState<'light' | 'dark'>('light');
   const [isSecureMode, setIsSecureMode] = useState(false);
   const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
   const [dataLoaded, setDataLoaded] = useState(false);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -148,6 +153,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // Get user's display name from Supabase
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          if (user.email) setUserEmail(user.email);
           if (user.user_metadata && user.user_metadata.name) {
             setUserName(user.user_metadata.name);
           } else if (user.email) {
@@ -309,6 +315,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
 
+  const deleteExpense = useCallback((id: string) => {
+    setExpenses(prev => prev.filter(e => e.id !== id));
+  }, []);
+
+  const updateExpense = useCallback((id: string, updates: Partial<Expense>) => {
+    setExpenses(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e));
+  }, []);
+
+  const deleteSubscription = useCallback((id: string) => {
+    setSubscriptions(prev => prev.filter(s => s.id !== id));
+  }, []);
+
   const updateGoal = useCallback((id: string, amount: number) => {
     setGoals(prev => prev.map(g => g.id === id ? { ...g, targetAmount: amount } : g));
   }, []);
@@ -329,7 +347,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{ 
-      userName, theme, setTheme, isSecureMode, toggleSecureMode, subscriptions, expenses, goals, emis, cashBalance, bankAccounts, budgets,
+      userName, userEmail, theme, setTheme, isSecureMode, toggleSecureMode, subscriptions, expenses, goals, emis, cashBalance, bankAccounts, budgets,
       friends, sharedExpenses, dataLoaded, lexHistory, lexTargetBucket, pendingActions, pastActions, actionResults,
       conversationId, modelTier,
       setLexHistory, appendLexMessages, setLexTargetBucket, clearLexSession,
@@ -337,7 +355,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setConversationId, setModelTier,
       proactiveAlerts, maturityForecast, setProactiveAlerts, setMaturityForecast, dismissAlert, isAlertDismissedToday, markAlertRead,
       setSubscriptions, setExpenses, setBankAccounts, setBudgets, setEmis,
-      addSubscription, cancelSubscription, renewSubscription, updateSubscription, addExpense, updateGoal, updateCashBalance,
+      addSubscription, cancelSubscription, renewSubscription, updateSubscription, addExpense, updateExpense, deleteExpense, deleteSubscription, updateGoal, updateCashBalance,
       addSharedExpense, settleWithFriend
     }}>
       {children}

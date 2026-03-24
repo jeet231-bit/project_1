@@ -492,60 +492,100 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
               )}
 
               {/* ══ Maturity Forecast Card (Phase 4) ══ */}
-              {maturityForecast && maturityForecast.data_points_used >= 3 && (
+              {maturityForecast && maturityForecast.data_points_used >= 3 ? (() => {
+                // Use real-time maturity score when available, fall back to last snapshot
+                const liveScore = behaviorMetrics?.financial_maturity?.maturity_index;
+                const score = liveScore ?? maturityForecast.current_score;
+                const projected = maturityForecast.predictions[maturityForecast.predictions.length - 1];
+                const t = maturityForecast.trajectory;
+                const headline = t === 'improving' ? 'Your score is trending upward'
+                  : t === 'declining' ? 'Your score is trending downward'
+                  : 'Your score is holding steady';
+                const takeaway = t === 'improving'
+                  ? `If you maintain your current habits, your score could rise from ${score} to ${projected}. The positive momentum is real — keep it up.`
+                  : t === 'declining'
+                  ? `At the current pace, your score could drop from ${score} to ${projected}. Consider reviewing subscriptions or reducing discretionary spend.`
+                  : score >= 60
+                  ? `Your score has been steady at ${score}. You're in a healthy range — incremental improvements in savings can push this even higher.`
+                  : `Your score has been steady at ${score}. Small changes like cutting one subscription or reducing weekend spending can move this up meaningfully.`;
+                return (
                 <motion.section
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                  className={`border rounded-[36px] p-6 shadow-sm space-y-4 ${maturityForecast.trajectory === 'improving'
+                  className={`border rounded-[36px] p-6 shadow-sm space-y-4 ${t === 'improving'
                       ? 'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/20'
-                      : maturityForecast.trajectory === 'declining'
+                      : t === 'declining'
                         ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/20'
                         : 'bg-white dark:bg-premium-card border-slate-100 dark:border-white/5'
                     }`}
                 >
                   <div className="flex items-center gap-2">
                     <LineChart size={14} className={
-                      maturityForecast.trajectory === 'improving' ? 'text-emerald-500' :
-                        maturityForecast.trajectory === 'declining' ? 'text-rose-500' : 'text-indigo-500'
+                      t === 'improving' ? 'text-emerald-500' :
+                        t === 'declining' ? 'text-rose-500' : 'text-indigo-500'
                     } />
-                    <p className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] flex items-center gap-1.5">
-                      Maturity Forecast <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'forecast' ? null : 'forecast')} className="cursor-help"><Info size={10} className="text-slate-400" /></button>
-                    </p>
-                    <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${maturityForecast.confidence === 'high' ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' :
-                        maturityForecast.confidence === 'medium' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400' :
-                          'bg-slate-100 dark:bg-slate-500/20 text-slate-500 dark:text-slate-400'
-                      }`}>{maturityForecast.confidence} confidence</span>
+                    <span className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] flex items-center gap-1.5">
+                      Financial Health Outlook <button onClick={(e) => { e.stopPropagation(); setShowMoneyInfo(showMoneyInfo === 'forecast' ? null : 'forecast'); }} className="cursor-help p-1 -m-1"><Info size={12} className="text-slate-400" /></button>
+                    </span>
                   </div>
                   <AnimatePresence>
                     {showMoneyInfo === 'forecast' && (
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="pt-1 pb-2">
-                        <p className="text-[10px] text-slate-400 dark:text-premium-muted font-medium leading-relaxed">Predicts where your financial maturity score is heading based on your recent trend. If you keep your current spending habits, this is the score you're likely to reach.</p>
+                        <p className="text-[10px] text-slate-400 dark:text-premium-muted font-medium leading-relaxed">Based on your recent spending patterns, we project where your Financial Maturity score is heading. This updates daily as more data comes in.</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
 
                   <div className="flex items-end gap-6">
                     <div>
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Current</p>
-                      <p className="text-2xl font-black text-slate-900 dark:text-premium-text">{maturityForecast.current_score}</p>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Now</p>
+                      <p className="text-2xl font-black text-slate-900 dark:text-premium-text">{score}<span className="text-sm font-bold text-slate-400">/100</span></p>
                     </div>
-                    <div className={`${maturityForecast.trajectory === 'improving' ? 'text-emerald-500' : maturityForecast.trajectory === 'declining' ? 'text-rose-500' : 'text-slate-400'}`}>
-                      {maturityForecast.trajectory === 'declining' ? <TrendingDown size={20} /> : <TrendingUp size={20} />}
+                    <div className={`${t === 'improving' ? 'text-emerald-500' : t === 'declining' ? 'text-rose-500' : 'text-slate-400'}`}>
+                      {t === 'declining' ? <TrendingDown size={20} /> : <TrendingUp size={20} />}
                     </div>
                     <div>
                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Projected</p>
-                      <p className={`text-2xl font-black ${maturityForecast.trajectory === 'improving' ? 'text-emerald-600 dark:text-emerald-400' :
-                          maturityForecast.trajectory === 'declining' ? 'text-rose-600 dark:text-rose-400' :
+                      <p className={`text-2xl font-black ${t === 'improving' ? 'text-emerald-600 dark:text-emerald-400' :
+                          t === 'declining' ? 'text-rose-600 dark:text-rose-400' :
                             'text-slate-900 dark:text-premium-text'
-                        }`}>{maturityForecast.predictions[maturityForecast.predictions.length - 1]}</p>
+                        }`}>{projected}<span className="text-sm font-bold text-slate-400">/100</span></p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-[10px] font-medium text-slate-500 dark:text-premium-muted">
-                    <span>{maturityForecast.trajectory_label}</span>
-                    <span>•</span>
-                    <span>Slope: {maturityForecast.slope > 0 ? '+' : ''}{maturityForecast.slope}/period</span>
-                    <span>•</span>
-                    <span>{maturityForecast.data_points_used} snapshots</span>
+                  <p className="text-[11px] font-medium text-slate-500 dark:text-premium-muted leading-relaxed">
+                    {headline} — {takeaway}
+                  </p>
+                </motion.section>
+              );})() : (
+                /* Warming-up placeholder when forecast isn't ready yet */
+                <motion.section
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                  className="border border-indigo-100 dark:border-indigo-500/15 bg-indigo-50/50 dark:bg-indigo-500/5 rounded-[36px] p-6 shadow-sm space-y-3"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={14} className="text-indigo-400" />
+                    <p className="text-[9px] font-black text-indigo-400 dark:text-indigo-300/60 uppercase tracking-[0.2em]">
+                      Financial Health Outlook
+                    </p>
+                  </div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-premium-text">
+                    Building your financial trajectory...
+                  </p>
+                  <p className="text-[10px] font-medium text-slate-500 dark:text-premium-muted leading-relaxed">
+                    We're analyzing your spending patterns to project where your financial health is heading. This needs a few days of data — check back soon.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-indigo-100 dark:bg-indigo-500/10 h-1.5 rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-indigo-400 dark:bg-indigo-500/60 rounded-full"
+                        initial={{ width: '0%' }}
+                        animate={{ width: maturityForecast ? `${Math.min(100, (maturityForecast.data_points_used / 3) * 100)}%` : '15%' }}
+                        transition={{ duration: 1.5, ease: 'easeOut' }}
+                      />
+                    </div>
+                    <span className="text-[9px] font-bold text-indigo-400">
+                      {maturityForecast ? `${maturityForecast.data_points_used}/3 days` : 'Collecting data'}
+                    </span>
                   </div>
                 </motion.section>
               )}

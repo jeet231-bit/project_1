@@ -117,11 +117,12 @@ const SplitScreen: React.FC = () => {
                 initial={{ opacity: 0, y: 15 }} 
                 animate={{ opacity: 1, y: 0 }} 
                 whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
+                whileTap={{ scale: 0.97, boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}
                 transition={{ delay: i * 0.05 }} 
                 className="bg-white dark:bg-premium-card p-6 rounded-[2.5rem] border border-slate-100 dark:border-white/5 flex justify-between items-center group transition-all cursor-pointer active:scale-[0.98]"
               >
                 <div className="flex gap-4 items-center">
-                  <div className="w-14 h-14 rounded-3xl bg-slate-50 dark:bg-premium-dark flex items-center justify-center text-slate-400 dark:text-premium-muted/50 text-xl border border-slate-100 dark:border-white/5 shrink-0 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 group-hover:text-indigo-600 transition-colors">
+                  <div className="w-14 h-14 rounded-3xl bg-slate-50 dark:bg-premium-dark flex items-center justify-center text-slate-400 dark:text-premium-muted/50 text-xl border border-slate-100 dark:border-white/5 shrink-0 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 group-hover:text-indigo-600 group-active:bg-indigo-50 dark:group-active:bg-indigo-500/10 group-active:text-indigo-600 transition-colors">
                     <HandCoins size={20} />
                   </div>
                   <div>

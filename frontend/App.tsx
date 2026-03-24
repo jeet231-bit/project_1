@@ -125,8 +125,8 @@ const App: React.FC = () => {
   const renderScreen = () => {
     switch (activeTab) {
       case 'home': return <Dashboard onNavigate={handleNavigate} />;
-      case 'subs': return <Subscriptions onViewDetail={navigateToSubDetail} />;
-      case 'expenses': return <ExpenseList />;
+      case 'subs': return <Subscriptions onViewDetail={navigateToSubDetail} onNavigate={handleNavigate} />;
+      case 'expenses': return <ExpenseList onNavigate={handleNavigate} />;
       case 'split': return <SplitScreen />;
       case 'insights': return <Insights onNavigate={handleNavigate} />;
       case 'settings': return <SettingsScreen />;
