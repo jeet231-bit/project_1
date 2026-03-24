@@ -1700,7 +1700,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
       {/* Privacy First Analytics — only on Money and Action tabs */}
       {(activeBucket === 'money' || activeBucket === 'action') && (
         <div className="bg-zinc-950 dark:bg-premium-card rounded-[44px] p-10 text-white relative shadow-2xl overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-1000"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl group-hover:scale-125 group-active:scale-125 transition-transform duration-1000 pointer-events-none"></div>
           <Sparkles className="text-indigo-400 mb-6" size={28} />
           <h3 className="text-2xl font-black mb-3 tracking-tight">Privacy First Architecture</h3>
           <p className="text-[11px] text-zinc-400 dark:text-premium-muted leading-relaxed font-medium">

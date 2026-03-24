@@ -410,7 +410,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                                 handleMarkAlertRead(alert.id);
                                 onNavigate('insights');
                               }}
-                              className="flex items-center gap-1.5 justify-start text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-1 text-left hover:underline"
+                              className="flex items-center gap-1.5 justify-start text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-1 text-left hover:underline active:underline"
                             >
                               {alert.suggested_action} <ArrowRight size={10} />
                             </button>
@@ -558,7 +558,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                   </button>
                   <button
                     onClick={() => setShowAddBank(false)}
-                    className="px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors"
+                    className="px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 active:text-slate-600 transition-colors"
                   >
                     Cancel
                   </button>
@@ -581,7 +581,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 px-1">
           {/* Cash Wallet card */}
-          <div className="min-w-[170px] bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 hover:border-indigo-100 dark:hover:border-indigo-900 transition-all shrink-0">
+          <div className="min-w-[170px] bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 hover:border-indigo-100 dark:hover:border-indigo-900 active:border-indigo-100 dark:active:border-indigo-900 transition-all shrink-0">
             <div className="flex justify-between items-start">
               <div className="w-9 h-9 rounded-2xl flex items-center justify-center text-xs bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">
                 <Wallet size={16} />
@@ -589,14 +589,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               {isEditingCash ? (
                 <button
                   onClick={() => { updateCashBalance(parseFloat(cashEditVal) || 0); setIsEditingCash(false); }}
-                  className="p-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors"
+                  className="p-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 active:bg-emerald-100 dark:active:bg-emerald-500/20 transition-colors"
                 >
                   <Check size={12} className="text-emerald-600 dark:text-emerald-400" />
                 </button>
               ) : (
                 <button
                   onClick={() => { setIsEditingCash(true); setCashEditVal(cashBalance.currentBalance.toString()); }}
-                  className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+                  className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 active:bg-slate-100 dark:active:bg-white/5 transition-colors"
                 >
                   <Edit2 size={12} className="text-slate-400" />
                 </button>
@@ -629,7 +629,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               return true;
             });
           })().map((acc, i) => (
-            <div key={acc.id} className="min-w-[170px] bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 hover:border-indigo-100 dark:hover:border-indigo-900 transition-all shrink-0 active:scale-95">
+            <div key={acc.id} className="min-w-[170px] bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 hover:border-indigo-100 dark:hover:border-indigo-900 active:border-indigo-100 dark:active:border-indigo-900 transition-all shrink-0 active:scale-95">
               <div className="flex justify-between items-start">
                 <div className={`w-9 h-9 rounded-2xl flex items-center justify-center text-xs ${acc.accountType === 'Digital' ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'}`}>
                   {acc.accountType === 'Digital' ? <Wallet size={16} /> : <Building2 size={16} />}
@@ -647,7 +647,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
       {/* Goal Section */}
       <section className="bg-indigo-600 dark:bg-indigo-700 rounded-[36px] p-8 text-white shadow-2xl relative overflow-hidden group">
-        <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-colors"></div>
+        <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 group-active:bg-white/10 transition-colors pointer-events-none"></div>
         {goals.map(goal => (
           <div key={goal.id} className="space-y-6 relative z-10">
             <div className="flex justify-between items-center">

@@ -411,6 +411,8 @@ const Chatbot: React.FC = () => {
                               }}
                               onMouseEnter={e => { (e.target as HTMLElement).style.background = `${C.accent}20`; }}
                               onMouseLeave={e => { (e.target as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; }}
+                              onTouchStart={e => { (e.target as HTMLElement).style.background = `${C.accent}20`; }}
+                              onTouchEnd={e => { setTimeout(() => { (e.target as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; }, 150); }}
                             >
                               {s}
                             </button>

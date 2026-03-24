@@ -207,7 +207,7 @@ const Settings: React.FC = () => {
                 className="w-full flex items-center justify-between py-1 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="bg-slate-50 dark:bg-zinc-800 p-2.5 rounded-2xl text-slate-600 group-hover:text-indigo-500 transition-colors"><Database size={18} /></div>
+                  <div className="bg-slate-50 dark:bg-zinc-800 p-2.5 rounded-2xl text-slate-600 group-hover:text-indigo-500 group-active:text-indigo-500 transition-colors"><Database size={18} /></div>
                   <div className="text-left">
                     <span className="text-sm font-bold text-slate-800 dark:text-zinc-200">Export Vault</span>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">5 data features</p>

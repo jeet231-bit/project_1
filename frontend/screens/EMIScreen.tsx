@@ -79,7 +79,7 @@ const EMIScreen: React.FC<EMIScreenProps> = ({ onBack }) => {
             <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-6 rounded-[32px] space-y-4 shadow-sm">
               <div className="flex justify-between items-center">
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Add New EMI / Loan</p>
-                <button onClick={() => setShowAddForm(false)} className="text-slate-400 hover:text-slate-600 transition-colors"><X size={16} /></button>
+                <button onClick={() => setShowAddForm(false)} className="text-slate-400 hover:text-slate-600 active:text-slate-600 transition-colors"><X size={16} /></button>
               </div>
               <div className="space-y-3">
                 <input
@@ -167,7 +167,7 @@ const EMIScreen: React.FC<EMIScreenProps> = ({ onBack }) => {
             <div className="flex items-center justify-between pt-5 border-t border-slate-50 dark:border-zinc-800">
                <button
                  onClick={() => handleDeleteEmi(emi.id)}
-                 className="text-rose-500 text-[10px] font-black uppercase flex items-center gap-1 hover:text-rose-600 transition-colors"
+                 className="text-rose-500 text-[10px] font-black uppercase flex items-center gap-1 hover:text-rose-600 active:text-rose-600 transition-colors"
                >
                  Remove
                </button>

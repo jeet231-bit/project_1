@@ -41,7 +41,7 @@ const SubCard: React.FC<{ sub: Subscription; index: number; onViewDetail: (id: s
       )}
       <div className="flex justify-between items-start mb-6">
         <div className="flex gap-4 items-center">
-          <div className="w-14 h-14 rounded-3xl bg-slate-50 dark:bg-premium-dark flex items-center justify-center text-slate-900 dark:text-premium-text text-xl border border-slate-100 dark:border-white/5 shrink-0 group-hover:bg-slate-900 dark:group-hover:bg-indigo-600 group-hover:text-white group-active:bg-slate-900 dark:group-active:bg-indigo-600 group-active:text-white transition-colors duration-300">
+          <div className="w-14 h-14 rounded-3xl bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 text-xl border border-slate-800 dark:border-white/20 shrink-0 transition-colors duration-300">
             {getSubIcon(sub.name, hover)}
           </div>
           <div>
@@ -134,8 +134,8 @@ const SubSubscriptions: React.FC<SubsProps> = ({ onViewDetail, onNavigate }) => 
 
   const getSubIcon = (name: string, isHovered: boolean) => {
     const n = name.toLowerCase();
-    const s = isHovered ? { color: 'white' } : { color: 'currentColor' };
-    const f = isHovered ? 'white' : 'currentColor';
+    const s = { color: 'currentColor' };
+    const f = 'currentColor';
     const sz = 22;
 
     // Streaming & Video

@@ -96,7 +96,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                 </button>
               )}
               <div className="flex gap-4 items-center">
-                <div className="w-14 h-14 rounded-3xl bg-slate-50 dark:bg-premium-dark flex items-center justify-center text-slate-400 dark:text-premium-muted/50 text-xl border border-slate-100 dark:border-white/5 shrink-0 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 group-hover:text-indigo-600 group-active:bg-indigo-50 dark:group-active:bg-indigo-500/10 group-active:text-indigo-600 transition-colors">
+                <div className="w-14 h-14 rounded-3xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-xl border border-indigo-100 dark:border-indigo-500/10 shrink-0 transition-colors">
                   {getIcon(exp.category)}
                 </div>
                 <div>

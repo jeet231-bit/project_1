@@ -75,7 +75,7 @@ const SplitScreen: React.FC = () => {
             className="space-y-4"
           >
             {friends.map((friend) => (
-              <div key={friend.id} className="bg-white dark:bg-premium-card p-6 rounded-[36px] border border-slate-100 dark:border-white/5 shadow-sm flex items-center justify-between group hover:border-indigo-100 dark:hover:border-indigo-900 transition-all active:scale-[0.98] cursor-pointer">
+              <div key={friend.id} className="bg-white dark:bg-premium-card p-6 rounded-[36px] border border-slate-100 dark:border-white/5 shadow-sm flex items-center justify-between group hover:border-indigo-100 dark:hover:border-indigo-900 active:border-indigo-100 dark:active:border-indigo-900 transition-all active:scale-[0.98] cursor-pointer">
                 <div className="flex items-center gap-5">
                   <div className="w-14 h-14 bg-slate-50 dark:bg-premium-dark rounded-[22px] flex items-center justify-center text-slate-400 dark:text-premium-muted font-black text-xl border border-slate-100 dark:border-white/5">
                     {friend.name.charAt(0)}
