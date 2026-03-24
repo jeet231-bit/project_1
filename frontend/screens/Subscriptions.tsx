@@ -22,9 +22,11 @@ const SubCard: React.FC<{ sub: Subscription; index: number; onViewDetail: (id: s
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.08)' }}
-      whileTap={{ scale: 0.97 }}
+      whileTap={{ scale: 0.97, y: -2, boxShadow: '0 10px 30px rgba(0,0,0,0.06)' }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      onTouchStart={() => setHover(true)}
+      onTouchEnd={() => setHover(false)}
       transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94], delay: index * 0.08 }}
       onClick={() => editMode ? onEdit?.(sub) : onViewDetail(sub.id)}
       className={`bg-white dark:bg-premium-card p-6 rounded-[2.5rem] shadow-sm cursor-pointer group relative ${editMode ? 'border-2 border-indigo-400/50 dark:border-indigo-500/40' : 'border border-slate-50 dark:border-white/5'}`}

@@ -39,13 +39,19 @@ body {
 
 /* Remove default Recharts chart border / background rect */
 .recharts-wrapper,
+.recharts-responsive-container,
 .recharts-surface {
   outline: none !important;
   border: none !important;
+  -webkit-tap-highlight-color: transparent;
 }
-.recharts-surface > rect,
+svg.recharts-surface {
+  overflow: visible !important;
+}
+svg.recharts-surface > rect,
 .recharts-cartesian-grid-bg rect {
   fill: transparent !important;
-  stroke: none !important;
+  stroke: transparent !important;
   stroke-width: 0 !important;
+  display: none !important;
 }

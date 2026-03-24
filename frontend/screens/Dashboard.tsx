@@ -952,7 +952,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           {/* Visualizing the Growth Curve */}
           <div className="h-24 w-full relative z-10">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={projectionData}>
+              <AreaChart data={projectionData} style={{ overflow: 'visible' }}>
                 <defs>
                   <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
