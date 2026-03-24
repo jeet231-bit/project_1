@@ -292,7 +292,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
               <div className="flex gap-4">
                 <div className="p-8 rounded-[40px] bg-indigo-600 text-white flex-1 space-y-4 shadow-xl">
                   <p className="text-[9px] font-black uppercase tracking-[0.25em] opacity-60 flex items-center gap-1.5">
-                    Money Intelligence <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'outflow' ? null : 'outflow')} className="cursor-help"><Info size={10} className="text-white/50" /></button>
+                    Money Intelligence <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'outflow' ? null : 'outflow')} className="cursor-help p-2 -m-2"><Info size={10} className="text-white/50" /></button>
                   </p>
                   <h3 className="text-3xl font-black tracking-tighter">₹{Math.round(totalMonthlyOutflow).toLocaleString()}</h3>
                   <p className="text-[9px] font-bold opacity-60 uppercase">Total computed outflow for this month.</p>
@@ -318,12 +318,12 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                   className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 rounded-[40px] p-8 text-white shadow-2xl relative"
                 >
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-3xl" />
-                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-400/10 rounded-full blur-2xl" />
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-400/10 rounded-full blur-2xl pointer-events-none" />
                   <div className="flex items-center gap-2 mb-5">
                     <Brain size={16} className="text-indigo-200" />
                     <p className="text-[9px] font-black uppercase tracking-[0.25em] text-indigo-200 flex items-center gap-1.5">
-                      Financial Maturity Index <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'maturity' ? null : 'maturity')} className="cursor-help"><Info size={10} className="text-indigo-300/60" /></button>
+                      Financial Maturity Index <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'maturity' ? null : 'maturity')} className="cursor-help p-2 -m-2"><Info size={10} className="text-indigo-300/60" /></button>
                     </p>
                   </div>
                   <AnimatePresence>
@@ -380,7 +380,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                   className="bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 rounded-[36px] p-6 shadow-sm"
                 >
                   <p className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] mb-4 flex items-center gap-1.5">
-                    Supporting Signals <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'signals' ? null : 'signals')} className="cursor-help"><Info size={10} className="text-slate-400" /></button>
+                    Supporting Signals <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'signals' ? null : 'signals')} className="cursor-help p-2 -m-2"><Info size={10} className="text-slate-400" /></button>
                   </p>
                   <AnimatePresence>
                     {showMoneyInfo === 'signals' && (
@@ -394,7 +394,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                       <div className="flex items-center gap-2">
                         <Activity size={12} className="text-amber-500" />
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex-1">Volatility</p>
-                        <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-volatility' ? null : 'sig-volatility')} className="cursor-help"><Info size={9} className="text-slate-300" /></button>
+                        <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-volatility' ? null : 'sig-volatility')} className="cursor-help p-2 -m-2"><Info size={9} className="text-slate-300" /></button>
                       </div>
                       <p className={`text-sm font-black ${behaviorMetrics.spend_volatility.volatility_score >= 60 ? 'text-rose-500' :
                           behaviorMetrics.spend_volatility.volatility_score >= 30 ? 'text-amber-500' : 'text-emerald-500'
@@ -409,7 +409,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                       <div className="flex items-center gap-2">
                         <Wallet size={12} className="text-rose-500" />
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex-1">Sub Burden</p>
-                        <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-burden' ? null : 'sig-burden')} className="cursor-help"><Info size={9} className="text-slate-300" /></button>
+                        <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-burden' ? null : 'sig-burden')} className="cursor-help p-2 -m-2"><Info size={9} className="text-slate-300" /></button>
                       </div>
                       <p className={`text-sm font-black ${behaviorMetrics.subscription_burden.risk_level === 'Critical' ? 'text-rose-500' :
                           behaviorMetrics.subscription_burden.risk_level === 'Elevated' ? 'text-amber-500' : 'text-emerald-500'
@@ -423,11 +423,11 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                     <div className="bg-slate-50 dark:bg-premium-dark rounded-2xl p-4 space-y-1">
                       <div className="flex items-center gap-2">
                         <PieChart size={12} className="text-violet-500" />
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex-1">Concentration</p>
-                        <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-concentration' ? null : 'sig-concentration')} className="cursor-help"><Info size={9} className="text-slate-300" /></button>
+                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex-1">Diversity</p>
+                        <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-concentration' ? null : 'sig-concentration')} className="cursor-help p-2 -m-2"><Info size={9} className="text-slate-300" /></button>
                       </div>
                       <p className="text-sm font-black text-violet-500">
-                        HHI {(behaviorMetrics.category_concentration.concentration_score * 100).toFixed(0)}%
+                        {Math.round(100 - behaviorMetrics.category_concentration.concentration_score * 100)}% Spread
                       </p>
                       <AnimatePresence>
                         {showMoneyInfo === 'sig-concentration' && (
@@ -439,13 +439,13 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                       <div className="flex items-center gap-2">
                         <Calendar size={12} className="text-cyan-500" />
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex-1">Weekend</p>
-                        <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-weekend' ? null : 'sig-weekend')} className="cursor-help"><Info size={9} className="text-slate-300" /></button>
+                        <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-weekend' ? null : 'sig-weekend')} className="cursor-help p-2 -m-2"><Info size={9} className="text-slate-300" /></button>
                       </div>
                       <p className={`text-sm font-black ${behaviorMetrics.weekend_bias.pattern === 'Leisure-skewed' ? 'text-amber-500' : 'text-emerald-500'
-                        }`}>{behaviorMetrics.weekend_bias.pattern}</p>
+                        }`}>{behaviorMetrics.weekend_bias.pattern === 'Leisure-skewed' ? 'Weekend-heavy' : behaviorMetrics.weekend_bias.pattern}</p>
                       <AnimatePresence>
                         {showMoneyInfo === 'sig-weekend' && (
-                          <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="text-[9px] text-slate-400 font-medium leading-relaxed pt-1">Whether you tend to spend more on weekends. Leisure-skewed means weekends cost noticeably more.</motion.p>
+                          <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="text-[9px] text-slate-400 font-medium leading-relaxed pt-1">Weekends are only 2 of 7 days — fair share is ~29%. If over 40% of your money goes on weekends, it's disproportionately high.</motion.p>
                         )}
                       </AnimatePresence>
                     </div>
@@ -462,7 +462,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                   <div className="flex items-center gap-2">
                     <TrendingUp size={14} className="text-indigo-500" />
                     <p className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] flex items-center gap-1.5">
-                      Maturity Over Time <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'trend' ? null : 'trend')} className="cursor-help"><Info size={10} className="text-slate-400" /></button>
+                      Maturity Over Time <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'trend' ? null : 'trend')} className="cursor-help p-2 -m-2"><Info size={10} className="text-slate-400" /></button>
                     </p>
                   </div>
                   <AnimatePresence>
@@ -481,7 +481,6 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                         }))}
                         margin={{ top: 5, right: 10, bottom: 5, left: 10 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" />
                         <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
                         <YAxis domain={[0, 100]} tick={{ fontSize: 8, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} width={25} />
                         <Line type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={2} dot={{ r: 3, fill: '#6366f1', strokeWidth: 1, stroke: '#fff' }} />
@@ -627,7 +626,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                 <div className="bg-white dark:bg-premium-card p-8 rounded-[40px] border border-slate-100 dark:border-white/5 space-y-4 shadow-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-500 dark:text-premium-muted flex items-center gap-1.5">
-                      Subscription Burden <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sub-burden' ? null : 'sub-burden')} className="cursor-help"><Info size={10} className="text-slate-400" /></button>
+                      Subscription Burden <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sub-burden' ? null : 'sub-burden')} className="cursor-help p-2 -m-2"><Info size={10} className="text-slate-400" /></button>
                     </span>
                     <span className="text-xs font-black text-slate-900 dark:text-premium-text">
                       {Math.round(behaviorMetrics.subscription_burden.burden_ratio * 100)}% of spend
@@ -706,6 +705,74 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                     </div>
                   </div>
                 )}
+
+                {/* ══ Active EMIs ══ */}
+                {emis.length > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] px-1">Active EMIs</p>
+                    {emis.map((emi, i) => {
+                      const dueDate = new Date(emi.dueDate);
+                      const daysUntil = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                      const isUrgent = daysUntil >= 0 && daysUntil <= 7;
+                      return (
+                        <motion.div
+                          key={emi.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true, amount: 0.3 }}
+                          transition={{ duration: 0.4, delay: i * 0.08 }}
+                          className="bg-white dark:bg-premium-card p-5 rounded-[2rem] border border-slate-100 dark:border-white/5 flex items-center gap-4"
+                        >
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${isUrgent ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-500' : 'bg-slate-50 dark:bg-premium-dark text-slate-400 dark:text-premium-muted'}`}>
+                            <Wallet size={18} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-black text-slate-900 dark:text-premium-text text-sm tracking-tight truncate">{emi.name}</p>
+                            <p className="text-[9px] font-bold text-slate-400 dark:text-premium-muted uppercase tracking-widest mt-0.5">
+                              Due {dueDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                              {isUrgent && <span className="text-rose-500 ml-1.5">• {daysUntil}d away</span>}
+                            </p>
+                          </div>
+                          <p className="font-black text-slate-900 dark:text-premium-text text-sm">₹{emi.monthlyAmount.toLocaleString()}</p>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* ══ Active Subscriptions (as commitments) ══ */}
+                {activeSubs.length > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] px-1">Recurring Subscriptions</p>
+                    {activeSubs.map((sub, i) => {
+                      const monthlyAmount = sub.billingCycle === 'yearly' ? Math.round(sub.amount / 12) : sub.amount;
+                      return (
+                        <motion.div
+                          key={sub.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true, amount: 0.3 }}
+                          transition={{ duration: 0.4, delay: i * 0.08 }}
+                          className="bg-white dark:bg-premium-card p-5 rounded-[2rem] border border-slate-100 dark:border-white/5 flex items-center gap-4"
+                        >
+                          <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-500 shrink-0">
+                            <Calendar size={18} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-black text-slate-900 dark:text-premium-text text-sm tracking-tight truncate">{sub.name}</p>
+                            <p className="text-[9px] font-bold text-slate-400 dark:text-premium-muted uppercase tracking-widest mt-0.5">
+                              {sub.category} • {sub.billingCycle}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-black text-slate-900 dark:text-premium-text text-sm">₹{monthlyAmount.toLocaleString()}</p>
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">/mo</p>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })()}
@@ -778,7 +845,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                         <div className="flex-1">
                           <div className="flex justify-between items-center w-full">
                             <p className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] flex items-center gap-1.5">
-                              Behavioral Persona <button onClick={() => setShowBehaviorInfo(showBehaviorInfo === 'persona' ? null : 'persona')} className="cursor-help"><Info size={10} className="text-slate-400" /></button>
+                              Behavioral Persona <button onClick={() => setShowBehaviorInfo(showBehaviorInfo === 'persona' ? null : 'persona')} className="cursor-help p-2 -m-2"><Info size={10} className="text-slate-400" /></button>
                             </p>
                           </div>
                           <h3 className="text-lg font-black text-slate-900 dark:text-premium-text tracking-tight leading-tight mt-0.5">
@@ -880,7 +947,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                     <div className="flex items-center gap-2">
                       <Shield size={14} className="text-indigo-500" />
                       <p className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] flex items-center gap-1.5">
-                        Risk Heatmap <button onClick={() => setShowBehaviorInfo(showBehaviorInfo === 'heatmap' ? null : 'heatmap')} className="cursor-help"><Info size={10} className="text-slate-400" /></button>
+                        Risk Heatmap <button onClick={() => setShowBehaviorInfo(showBehaviorInfo === 'heatmap' ? null : 'heatmap')} className="cursor-help p-2 -m-2"><Info size={10} className="text-slate-400" /></button>
                       </p>
                     </div>
                   </div>
@@ -891,13 +958,15 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                       </motion.div>
                     )}
                   </AnimatePresence>
+                  <p className="text-[8px] font-bold text-slate-400 dark:text-premium-muted text-center uppercase tracking-widest">Risk Score /100</p>
                   <div className="grid grid-cols-5 gap-2">
                     {(() => {
-                      const vol = behaviorMetrics.spend_volatility?.volatility_score || 0;
-                      const drift = behaviorMetrics.lifestyle_drift?.drift_count || 0;
-                      const burden = (behaviorMetrics.subscription_burden?.burden_ratio || 0) * 100;
-                      const conc = (behaviorMetrics.category_concentration?.concentration_score || 0) * 100;
-                      const weekend = (behaviorMetrics.weekend_bias?.weekend_ratio || 0) * 100;
+                      const vol = Math.min(100, behaviorMetrics.spend_volatility?.volatility_score || 0);
+                      const driftRaw = behaviorMetrics.lifestyle_drift?.drift_count || 0;
+                      const drift = Math.min(100, driftRaw * 25);
+                      const burden = Math.min(100, (behaviorMetrics.subscription_burden?.burden_ratio || 0) * 100);
+                      const conc = Math.min(100, (behaviorMetrics.category_concentration?.concentration_score || 0) * 100);
+                      const weekend = Math.min(100, (behaviorMetrics.weekend_bias?.weekend_ratio || 0) * 100);
 
                       const getColor = (val: number, thresholds: [number, number]) => {
                         if (val >= thresholds[1]) return { bg: 'bg-rose-500', text: 'text-white', label: 'HIGH' };
@@ -906,26 +975,26 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                       };
 
                       const cells = [
-                        { name: 'Volatility', val: vol, ...getColor(vol, [30, 60]) },
-                        { name: 'Drift', val: drift * 25, ...getColor(drift * 25, [25, 50]) },
-                        { name: 'Burden', val: burden, ...getColor(burden, [35, 50]) },
-                        { name: 'Conc.', val: conc, ...getColor(conc, [30, 50]) },
-                        { name: 'Weekend', val: weekend, ...getColor(weekend, [32, 40]) },
+                        { name: 'Spending\nSwings', val: vol, ...getColor(vol, [30, 60]) },
+                        { name: 'Lifestyle\nCreep', val: drift, ...getColor(drift, [25, 50]) },
+                        { name: 'Sub\nLoad', val: burden, ...getColor(burden, [35, 50]) },
+                        { name: 'Category\nFocus', val: conc, ...getColor(conc, [30, 50]) },
+                        { name: 'Weekend\nBias', val: weekend, ...getColor(weekend, [32, 40]) },
                       ];
 
                       return cells.map((cell) => (
                         <div key={cell.name} className={`${cell.bg} rounded-2xl p-3 flex flex-col items-center justify-center aspect-square`}>
                           <span className={`text-[8px] font-black ${cell.text} uppercase tracking-wider`}>{cell.label}</span>
                           <span className={`text-lg font-black ${cell.text} leading-none mt-1`}>{Math.round(cell.val)}</span>
-                          <span className={`text-[7px] font-bold ${cell.text} opacity-70 mt-1 text-center leading-tight`}>{cell.name}</span>
+                          <span className={`text-[6px] font-bold ${cell.text} opacity-70 mt-1 text-center leading-tight whitespace-pre-line`}>{cell.name}</span>
                         </div>
                       ));
                     })()}
                   </div>
                   <div className="flex items-center justify-center gap-4 pt-1">
-                    <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500" /><span className="text-[8px] font-bold text-slate-400">Low Risk</span></div>
-                    <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-amber-400" /><span className="text-[8px] font-bold text-slate-400">Medium</span></div>
-                    <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-rose-500" /><span className="text-[8px] font-bold text-slate-400">High Risk</span></div>
+                    <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500" /><span className="text-[8px] font-bold text-slate-400">Safe (0-29)</span></div>
+                    <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-amber-400" /><span className="text-[8px] font-bold text-slate-400">Watch (30-59)</span></div>
+                    <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-rose-500" /><span className="text-[8px] font-bold text-slate-400">Alert (60+)</span></div>
                   </div>
                 </motion.section>
 
@@ -939,7 +1008,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                       <div className="flex items-center gap-2">
                         <History size={14} className="text-indigo-500" />
                         <p className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] flex items-center gap-1.5">
-                          Maturity Trend <button onClick={() => setShowBehaviorInfo(showBehaviorInfo === 'trend' ? null : 'trend')} className="cursor-help"><Info size={10} className="text-slate-400" /></button>
+                          Maturity Trend <button onClick={() => setShowBehaviorInfo(showBehaviorInfo === 'trend' ? null : 'trend')} className="cursor-help p-2 -m-2"><Info size={10} className="text-slate-400" /></button>
                         </p>
                       </div>
                       <span className="text-[9px] font-bold text-slate-300 dark:text-premium-muted/30 uppercase tracking-widest">{maturityHistory.length} snapshots</span>
@@ -1248,7 +1317,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className={`text-[10px] font-black uppercase tracking-widest ${behaviorMetrics.weekend_bias.pattern === 'Leisure-skewed' ? 'text-amber-500' : 'text-emerald-500'
-                        }`}>{behaviorMetrics.weekend_bias.pattern}</span>
+                        }`}>{behaviorMetrics.weekend_bias.pattern === 'Leisure-skewed' ? 'Weekend-heavy' : behaviorMetrics.weekend_bias.pattern}</span>
                       {expandedBehavior === 'weekend' ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
                     </div>
                   </button>
@@ -1319,10 +1388,10 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="px-6 pb-6 space-y-4">
                         {/* Quadrant guide */}
                         <div className="grid grid-cols-2 gap-1.5 text-[8px] font-black uppercase tracking-widest">
-                          <div className="bg-amber-50 dark:bg-amber-500/5 rounded-xl p-2 text-center text-amber-500">⚡ Overpriced</div>
-                          <div className="bg-emerald-50 dark:bg-emerald-500/5 rounded-xl p-2 text-center text-emerald-500">★ High Value</div>
-                          <div className="bg-rose-50 dark:bg-rose-500/5 rounded-xl p-2 text-center text-rose-500">✕ Low Priority</div>
-                          <div className="bg-blue-50 dark:bg-blue-500/5 rounded-xl p-2 text-center text-blue-500">◆ Hidden Gem</div>
+                          <div className="bg-amber-50 dark:bg-amber-500/5 rounded-xl p-2 text-center text-amber-500">⚡ Costly & Low Use</div>
+                          <div className="bg-emerald-50 dark:bg-emerald-500/5 rounded-xl p-2 text-center text-emerald-500">★ Worth the Price</div>
+                          <div className="bg-rose-50 dark:bg-rose-500/5 rounded-xl p-2 text-center text-rose-500">✕ Can Drop</div>
+                          <div className="bg-blue-50 dark:bg-blue-500/5 rounded-xl p-2 text-center text-blue-500">◆ Cheap & Useful</div>
                         </div>
 
                         <div className="relative h-72 w-full">
@@ -1335,7 +1404,6 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
 
                           <ResponsiveContainer width="100%" height="100%">
                             <ScatterChart margin={{ top: 20, right: 20, bottom: 30, left: 35 }}>
-                              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.12)" />
                               <XAxis
                                 type="number"
                                 dataKey="x"
@@ -1362,8 +1430,8 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                                   if (active && payload?.[0]) {
                                     const d = payload[0].payload;
                                     const zone = d.x >= 50
-                                      ? (d.y >= (scatterData.reduce((s: number, p: any) => s + p.y, 0) / (scatterData.length || 1)) ? '★ High Value' : '◆ Hidden Gem')
-                                      : (d.y >= (scatterData.reduce((s: number, p: any) => s + p.y, 0) / (scatterData.length || 1)) ? '⚡ Overpriced' : '✕ Low Priority');
+                                      ? (d.y >= (scatterData.reduce((s: number, p: any) => s + p.y, 0) / (scatterData.length || 1)) ? '★ Worth the Price' : '◆ Cheap & Useful')
+                                      : (d.y >= (scatterData.reduce((s: number, p: any) => s + p.y, 0) / (scatterData.length || 1)) ? '⚡ Costly & Low Use' : '✕ Can Drop');
                                     return (
                                       <div className="bg-[#0f172a] dark:bg-indigo-600 text-white px-4 py-3 rounded-2xl shadow-2xl space-y-1 min-w-[140px]">
                                         <p className="text-[11px] font-black">{d.name}</p>
@@ -1380,12 +1448,13 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                                 data={scatterData}
                                 shape={(props: any) => {
                                   const { cx, cy, payload } = props;
-                                  const colors = ['#6366f1', '#10b981', '#f43f5e', '#f59e0b', '#8b5cf6'];
-                                  const idx = scatterData.findIndex((d: any) => d.name === payload.name);
-                                  const color = colors[idx % colors.length];
+                                  const avgY = scatterData.reduce((s: number, p: any) => s + p.y, 0) / (scatterData.length || 1);
+                                  const quadrantColor = payload.x >= 50
+                                    ? (payload.y >= avgY ? '#10b981' : '#3b82f6')
+                                    : (payload.y >= avgY ? '#f59e0b' : '#f43f5e');
                                   return (
                                     <g>
-                                      <circle cx={cx} cy={cy} r={7} fill={color} stroke="white" strokeWidth={2} style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.15))' }} />
+                                      <circle cx={cx} cy={cy} r={7} fill={quadrantColor} stroke="white" strokeWidth={2} style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.15))' }} />
                                       <text x={cx} y={cy - 12} textAnchor="middle" fill="#475569" fontSize={8} fontWeight={800} className="dark:fill-premium-muted">
                                         {payload.name.length > 12 ? payload.name.slice(0, 11) + '…' : payload.name}
                                       </text>
@@ -1393,9 +1462,13 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                                   );
                                 }}
                               >
-                                {scatterData.map((entry, index) => (
-                                  <Cell key={`cell-${index}`} fill={['#6366f1', '#10b981', '#f43f5e', '#f59e0b', '#8b5cf6'][index % 5]} />
-                                ))}
+                                {scatterData.map((entry) => {
+                                  const avgY = scatterData.reduce((s: number, p: any) => s + p.y, 0) / (scatterData.length || 1);
+                                  const color = entry.x >= 50
+                                    ? (entry.y >= avgY ? '#10b981' : '#3b82f6')
+                                    : (entry.y >= avgY ? '#f59e0b' : '#f43f5e');
+                                  return <Cell key={`cell-${entry.name}`} fill={color} />;
+                                })}
                               </Scatter>
                             </ScatterChart>
                           </ResponsiveContainer>
@@ -1403,12 +1476,18 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
 
                         {/* Legend */}
                         <div className="flex flex-wrap items-center gap-3 pt-1 justify-center">
-                          {scatterData.map((entry, index) => (
+                          {scatterData.map((entry) => {
+                            const avgY = scatterData.reduce((s: number, p: any) => s + p.y, 0) / (scatterData.length || 1);
+                            const color = entry.x >= 50
+                              ? (entry.y >= avgY ? '#10b981' : '#3b82f6')
+                              : (entry.y >= avgY ? '#f59e0b' : '#f43f5e');
+                            return (
                             <div key={entry.name} className="flex items-center gap-1.5">
-                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ['#6366f1', '#10b981', '#f43f5e', '#f59e0b', '#8b5cf6'][index % 5] }} />
+                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
                               <span className="text-[8px] font-bold text-slate-500 dark:text-premium-muted">{entry.name}</span>
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </motion.div>
                     )}

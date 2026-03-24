@@ -12,19 +12,22 @@ import { SubscriptionStatus, BillingCycle } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Extracted card component — owns its own hover state (fixes Rules of Hooks violation)
-const SubCard: React.FC<{ sub: Subscription; onViewDetail: (id: string) => void; getSubIcon: (name: string, active: boolean) => React.ReactNode; editMode?: boolean; onCancel?: (id: string) => void; onEdit?: (sub: Subscription) => void }> = ({ sub, onViewDetail, getSubIcon, editMode, onCancel, onEdit }) => {
+const SubCard: React.FC<{ sub: Subscription; index: number; onViewDetail: (id: string) => void; getSubIcon: (name: string, active: boolean) => React.ReactNode; editMode?: boolean; onCancel?: (id: string) => void; onEdit?: (sub: Subscription) => void }> = ({ sub, index, onViewDetail, getSubIcon, editMode, onCancel, onEdit }) => {
   const [hover, setHover] = useState(false);
   return (
     <motion.div
       key={sub.id}
       layout
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.08)' }}
+      whileTap={{ scale: 0.97 }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      transition={{ duration: 0.3, type: 'spring', stiffness: 300 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94], delay: index * 0.08 }}
       onClick={() => editMode ? onEdit?.(sub) : onViewDetail(sub.id)}
-      className={`bg-white dark:bg-premium-card p-6 rounded-[2.5rem] border border-slate-50 dark:border-white/5 shadow-sm hover:shadow-xl hover:scale-[1.02] active:shadow-xl active:scale-[0.97] transition-all duration-300 cursor-pointer group relative ${editMode ? 'ring-2 ring-indigo-500/20' : ''}`}
+      className={`bg-white dark:bg-premium-card p-6 rounded-[2.5rem] shadow-sm cursor-pointer group relative ${editMode ? 'border-2 border-indigo-400/50 dark:border-indigo-500/40' : 'border border-slate-50 dark:border-white/5'}`}
     >
       {editMode && (
         <button
@@ -265,8 +268,8 @@ const SubSubscriptions: React.FC<SubsProps> = ({ onViewDetail, onNavigate }) => 
 
       <div className="space-y-6">
         <AnimatePresence mode="popLayout">
-          {filteredSubs.map((sub) => (
-            <SubCard key={sub.id} sub={sub} onViewDetail={onViewDetail} getSubIcon={getSubIcon} editMode={editMode} onCancel={cancelSubscription} onEdit={openEditSub} />
+          {filteredSubs.map((sub, i) => (
+            <SubCard key={sub.id} sub={sub} index={i} onViewDetail={onViewDetail} getSubIcon={getSubIcon} editMode={editMode} onCancel={cancelSubscription} onEdit={openEditSub} />
           ))}
         </AnimatePresence>
       </div>

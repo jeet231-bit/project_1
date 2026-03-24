@@ -85,7 +85,9 @@ const App: React.FC = () => {
       try {
         const res = await api.get('/onboarding/status');
         console.log('DEBUG: Onboarding status:', res);
-        if (res.is_complete) {
+        // Existing user with any data → go to app; only brand-new (zero data) → onboarding
+        const hasAnyData = (res.counts?.income || 0) + (res.counts?.subscriptions || 0) + (res.counts?.expenses || 0) > 0;
+        if (res.is_complete || hasAnyData) {
           setStage('app');
         } else {
           setStage('onboarding');
@@ -99,9 +101,10 @@ const App: React.FC = () => {
       }
     }
 
-    // All retries exhausted — default to onboarding for new users (safe fallback)
-    console.warn('DEBUG: Onboarding check failed after retries, defaulting to onboarding');
-    setStage('onboarding');
+    // All retries exhausted — if we have a session, the user exists, so go to app
+    // Only show onboarding if there's truly no session (shouldn't happen here)
+    console.warn('DEBUG: Onboarding check failed after retries, defaulting to app');
+    setStage('app');
   };
 
   // ── Scroll to top on screen change ────────────────────────────

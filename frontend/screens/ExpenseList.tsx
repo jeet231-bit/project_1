@@ -74,13 +74,14 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
           {expenses.map((exp, i) => (
             <motion.div 
               key={exp.id} 
-              initial={{ opacity: 0, y: 15 }} 
-              animate={{ opacity: 1, y: 0 }} 
+              initial={{ opacity: 0, y: 30 }} 
+              whileInView={{ opacity: 1, y: 0 }} 
+              viewport={{ once: true, amount: 0.2 }}
               whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
               whileTap={{ scale: 0.97, boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}
-              transition={{ delay: i * 0.05 }} 
+              transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94], delay: i * 0.08 }} 
               onClick={() => editMode && openEditModal(exp)}
-              className={`bg-white dark:bg-premium-card p-6 rounded-[2.5rem] border border-slate-100 dark:border-white/5 flex justify-between items-center group transition-all cursor-pointer active:scale-[0.98] relative ${editMode ? 'ring-2 ring-indigo-500/20' : ''}`}
+              className={`bg-white dark:bg-premium-card p-6 rounded-[2.5rem] flex justify-between items-center group cursor-pointer relative ${editMode ? 'border-2 border-indigo-400/50 dark:border-indigo-500/40' : 'border border-slate-100 dark:border-white/5'}`}
             >
               {editMode && (
                 <button
