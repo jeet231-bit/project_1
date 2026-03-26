@@ -59,14 +59,14 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
       <header className="flex justify-between items-center">
         <h1 className="text-2xl font-black text-slate-900 dark:text-premium-text tracking-tight">Daily Spend</h1>
         <div className="flex gap-2">
-          <button onClick={() => setEditMode(!editMode)} className={`w-9 h-9 rounded-full border flex items-center justify-center active:scale-95 transition-all ${editMode ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white dark:bg-premium-card border-slate-100 dark:border-white/5 text-slate-400'}`}><PenTool size={16} /></button>
-          <button onClick={() => onNavigate?.('settings')} className="w-9 h-9 bg-[#0f172a] dark:bg-premium-card rounded-full border border-white/5 flex items-center justify-center text-white dark:text-premium-text active:scale-95 transition-all"><User size={18} /></button>
+          <button onClick={() => setEditMode(!editMode)} className={`w-9 h-9 rounded-full border flex items-center justify-center active:opacity-70 transition-colors ${editMode ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white dark:bg-premium-card border-slate-100 dark:border-white/5 text-slate-400'}`}><PenTool size={16} /></button>
+          <button onClick={() => onNavigate?.('settings')} className="w-9 h-9 bg-[#0f172a] dark:bg-premium-card rounded-full border border-white/5 flex items-center justify-center text-white dark:text-premium-text active:opacity-70 transition-colors"><User size={18} /></button>
         </div>
       </header>
 
       <div className="flex justify-between items-center px-1">
         <h3 className="text-[10px] font-black text-slate-900 dark:text-premium-text uppercase tracking-[0.2em]">Expense Ledger</h3>
-        <button onClick={() => setShowAdd(true)} className="bg-[#0f172a] dark:bg-indigo-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg active:scale-95 transition-all"><Plus size={22} /></button>
+        <button onClick={() => setShowAdd(true)} className="bg-[#0f172a] dark:bg-indigo-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg active:scale-[0.975] transition-transform duration-150 ease-out"><Plus size={22} /></button>
       </div>
 
       <div className="space-y-4">
@@ -78,10 +78,10 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
               whileInView={{ opacity: 1, y: 0 }} 
               viewport={{ once: true, amount: 0.2 }}
               whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
-              whileTap={{ scale: 0.97, y: -2, boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}
+              whileTap={{ scale: 0.985, transition: { type: "spring", stiffness: 300, damping: 24 } }}
               transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94], delay: i * 0.08 }} 
               onClick={() => editMode && openEditModal(exp)}
-              className={`bg-white dark:bg-premium-card p-6 rounded-[2.5rem] flex justify-between items-center group cursor-pointer relative ${editMode ? 'border-2 border-indigo-400/50 dark:border-indigo-500/40' : 'border border-slate-100 dark:border-white/5'}`}
+              className={`bg-white dark:bg-premium-card p-6 rounded-[2.5rem] flex justify-between items-center group cursor-pointer relative transition-colors ${editMode ? 'border-2 border-indigo-400/50 dark:border-indigo-500/40' : 'border border-slate-100 dark:border-white/5'}`}
             >
               {editMode && (
                 <button
@@ -90,7 +90,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                     try { await api.delete(`/expenses/${exp.id}`); } catch {}
                     deleteExpense(exp.id);
                   }}
-                  className="absolute -top-2 -right-2 w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-lg z-10 active:scale-90 transition-all"
+                  className="absolute -top-2 -right-2 w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-lg z-10 active:opacity-70 transition-opacity"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -142,7 +142,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                   <button
                     key={cat}
                     onClick={() => setNewCategory(cat)}
-                    className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                    className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-colors duration-150 ${
                       newCategory === cat
                         ? 'bg-indigo-600 text-white shadow-lg'
                         : 'bg-slate-50 dark:bg-premium-card text-slate-400 dark:text-premium-muted border border-slate-100 dark:border-white/5'
@@ -158,7 +158,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                   <button
                     key={pm}
                     onClick={() => setNewPayment(pm)}
-                    className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                    className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-colors duration-150 ${
                       newPayment === pm
                         ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-lg'
                         : 'bg-slate-50 dark:bg-premium-card text-slate-400 dark:text-premium-muted border border-slate-100 dark:border-white/5'
@@ -208,7 +208,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                   setIsSubmitting(false);
                   setShowAdd(false);
                 }}
-                className="flex-[2] bg-[#0f172a] dark:bg-indigo-600 text-white py-6 rounded-[28px] font-black uppercase text-[10px] tracking-[0.2em] shadow-2xl active:scale-95 transition-all disabled:opacity-40"
+                className="flex-[2] bg-[#0f172a] dark:bg-indigo-600 text-white py-6 rounded-[28px] font-black uppercase text-[10px] tracking-[0.2em] shadow-2xl active:scale-[0.975] transition-transform duration-150 ease-out disabled:opacity-40"
               >
                 {isSubmitting ? 'Posting...' : 'Post Transaction'}
               </button>
@@ -245,7 +245,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                   <button
                     key={cat}
                     onClick={() => setNewCategory(cat)}
-                    className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                    className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-colors duration-150 ${
                       newCategory === cat
                         ? 'bg-indigo-600 text-white shadow-lg'
                         : 'bg-slate-50 dark:bg-premium-card text-slate-400 dark:text-premium-muted border border-slate-100 dark:border-white/5'
@@ -260,7 +260,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                   <button
                     key={pm}
                     onClick={() => setNewPayment(pm)}
-                    className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                    className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-colors duration-150 ${
                       newPayment === pm
                         ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-lg'
                         : 'bg-slate-50 dark:bg-premium-card text-slate-400 dark:text-premium-muted border border-slate-100 dark:border-white/5'
@@ -299,7 +299,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                   setIsSubmitting(false);
                   closeEditModal();
                 }}
-                className="flex-[2] bg-[#0f172a] dark:bg-indigo-600 text-white py-6 rounded-[28px] font-black uppercase text-[10px] tracking-[0.2em] shadow-2xl active:scale-95 transition-all disabled:opacity-40"
+                className="flex-[2] bg-[#0f172a] dark:bg-indigo-600 text-white py-6 rounded-[28px] font-black uppercase text-[10px] tracking-[0.2em] shadow-2xl active:scale-[0.975] transition-transform duration-150 ease-out disabled:opacity-40"
               >
                 {isSubmitting ? 'Saving...' : 'Save Changes'}
               </button>

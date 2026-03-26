@@ -22,7 +22,7 @@ const SubCard: React.FC<{ sub: Subscription; index: number; onViewDetail: (id: s
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.08)' }}
-      whileTap={{ scale: 0.97, y: -2, boxShadow: '0 10px 30px rgba(0,0,0,0.06)' }}
+      whileTap={{ scale: 0.985, transition: { type: "spring", stiffness: 300, damping: 24 } }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onTouchStart={() => setHover(true)}
@@ -34,7 +34,7 @@ const SubCard: React.FC<{ sub: Subscription; index: number; onViewDetail: (id: s
       {editMode && (
         <button
           onClick={(e) => { e.stopPropagation(); onCancel?.(sub.id); }}
-          className="absolute -top-2 -right-2 w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-lg z-10 active:scale-90 transition-all"
+          className="absolute -top-2 -right-2 w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-lg z-10 active:opacity-70 transition-opacity"
         >
           <X size={14} />
         </button>
@@ -56,11 +56,11 @@ const SubCard: React.FC<{ sub: Subscription; index: number; onViewDetail: (id: s
       </div>
 
       <div className="grid grid-cols-2 gap-2 mb-4">
-        <div className="px-4 py-2 rounded-2xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest bg-slate-50 dark:bg-premium-dark text-slate-500 dark:text-premium-muted/50 hover:bg-slate-100 dark:hover:bg-white/5 hover:scale-[1.05] active:bg-slate-100 dark:active:bg-white/5 active:scale-[1.05] transition-all duration-200">
+        <div className="px-4 py-2 rounded-2xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest bg-slate-50 dark:bg-premium-dark text-slate-500 dark:text-premium-muted/50 hover:bg-slate-100 dark:hover:bg-white/5 active:bg-slate-100 dark:active:bg-white/5 transition-colors duration-150">
           <Calendar size={12} className="text-slate-400" />
           Renewed
         </div>
-        <div className="px-4 py-2 rounded-2xl bg-slate-50 dark:bg-premium-dark text-slate-400 dark:text-premium-muted/50 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-white/5 hover:scale-[1.05] active:bg-slate-100 dark:active:bg-white/5 active:scale-[1.05] transition-all duration-200">
+        <div className="px-4 py-2 rounded-2xl bg-slate-50 dark:bg-premium-dark text-slate-400 dark:text-premium-muted/50 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-white/5 active:bg-slate-100 dark:active:bg-white/5 transition-colors duration-150">
           <ShieldCheck size={12} className={sub.autoPay ? "text-indigo-500" : "text-slate-300"} />
           {sub.autoPay ? 'Auto' : 'Manual'}
         </div>
@@ -238,7 +238,7 @@ const SubSubscriptions: React.FC<SubsProps> = ({ onViewDetail, onNavigate }) => 
                     <p className="text-[10px] font-black text-slate-300 dark:text-premium-muted/30 uppercase tracking-widest">Terminated</p>
                   </div>
                 </div>
-                <button onClick={() => renewSubscription(sub.id)} className="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-5 py-2.5 rounded-xl font-black text-[9px] uppercase tracking-[0.2em] active:scale-95 transition-all">Reactivate</button>
+                <button onClick={() => renewSubscription(sub.id)} className="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-5 py-2.5 rounded-xl font-black text-[9px] uppercase tracking-[0.2em] active:scale-[0.975] transition-transform duration-150 ease-out">Reactivate</button>
               </motion.div>
             ))
           )}
@@ -252,9 +252,9 @@ const SubSubscriptions: React.FC<SubsProps> = ({ onViewDetail, onNavigate }) => 
       <header className="flex justify-between items-center">
         <h1 className="text-2xl font-black text-slate-900 dark:text-premium-text tracking-tight">SubX Portfolio</h1>
         <div className="flex gap-2">
-          <button onClick={() => setEditMode(!editMode)} className={`w-9 h-9 rounded-full border flex items-center justify-center active:scale-95 transition-all ${editMode ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white dark:bg-premium-card border-slate-100 dark:border-white/5 text-slate-400'}`}><PenTool size={16} /></button>
-          <button onClick={() => setShowAdd(true)} className="w-9 h-9 bg-white dark:bg-premium-card rounded-full border border-slate-100 dark:border-white/5 flex items-center justify-center text-slate-800 dark:text-white transition-colors active:scale-95"><Plus size={18} /></button>
-          <button onClick={() => onNavigate?.('settings')} className="w-9 h-9 bg-[#0f172a] dark:bg-premium-card rounded-full flex items-center justify-center text-white active:scale-95 transition-all"><User size={18} /></button>
+          <button onClick={() => setEditMode(!editMode)} className={`w-9 h-9 rounded-full border flex items-center justify-center active:opacity-70 transition-colors ${editMode ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white dark:bg-premium-card border-slate-100 dark:border-white/5 text-slate-400'}`}><PenTool size={16} /></button>
+          <button onClick={() => setShowAdd(true)} className="w-9 h-9 bg-white dark:bg-premium-card rounded-full border border-slate-100 dark:border-white/5 flex items-center justify-center text-slate-800 dark:text-white transition-colors active:opacity-70"><Plus size={18} /></button>
+          <button onClick={() => onNavigate?.('settings')} className="w-9 h-9 bg-[#0f172a] dark:bg-premium-card rounded-full flex items-center justify-center text-white active:opacity-70 transition-colors"><User size={18} /></button>
         </div>
       </header>
 
@@ -262,7 +262,7 @@ const SubSubscriptions: React.FC<SubsProps> = ({ onViewDetail, onNavigate }) => 
         <h3 className="text-[10px] font-black text-slate-900 dark:text-premium-text uppercase tracking-[0.2em]">Live Portfolios</h3>
         <button 
           onClick={() => setView('cancelled')} 
-          className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400 tracking-widest flex items-center gap-1.5 border-b border-indigo-600/10 dark:border-indigo-400/10 pb-1 active:opacity-50 transition-all"
+          className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400 tracking-widest flex items-center gap-1.5 border-b border-indigo-600/10 dark:border-indigo-400/10 pb-1 active:opacity-70 transition-opacity"
         >
           View Past Leaks <ArrowRight size={12} />
         </button>
@@ -346,7 +346,7 @@ const SubSubscriptions: React.FC<SubsProps> = ({ onViewDetail, onNavigate }) => 
                   }
                 }}
                 className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${
-                  !newName.trim() || !newAmount ? 'bg-slate-100 dark:bg-premium-dark text-slate-300 dark:text-premium-muted/30 cursor-not-allowed' : 'bg-[#0f172a] dark:bg-indigo-600 text-white active:scale-95 shadow-xl'
+                  !newName.trim() || !newAmount ? 'bg-slate-100 dark:bg-premium-dark text-slate-300 dark:text-premium-muted/30 cursor-not-allowed' : 'bg-[#0f172a] dark:bg-indigo-600 text-white active:scale-[0.975] shadow-xl transition-transform duration-150 ease-out'
                 }`}
               >
                 <Plus size={16} /> Add Commitment
@@ -432,7 +432,7 @@ const SubSubscriptions: React.FC<SubsProps> = ({ onViewDetail, onNavigate }) => 
                     }
                   }}
                   className={`flex-[2] py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${
-                    !newName.trim() || !newAmount ? 'bg-slate-100 dark:bg-premium-dark text-slate-300 dark:text-premium-muted/30 cursor-not-allowed' : 'bg-[#0f172a] dark:bg-indigo-600 text-white active:scale-95 shadow-xl'
+                    !newName.trim() || !newAmount ? 'bg-slate-100 dark:bg-premium-dark text-slate-300 dark:text-premium-muted/30 cursor-not-allowed' : 'bg-[#0f172a] dark:bg-indigo-600 text-white active:scale-[0.975] shadow-xl transition-transform duration-150 ease-out'
                   }`}
                 >
                   Save Changes

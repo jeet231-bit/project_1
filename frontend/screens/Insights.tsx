@@ -1543,7 +1543,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                   <button
                     onClick={executeSelected}
                     disabled={selectedActions.size === 0 || isExecuting}
-                    className="w-full bg-[#0f172a] dark:bg-indigo-600 text-white py-5 rounded-[24px] font-black text-[10px] uppercase tracking-[0.25em] shadow-lg flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-40"
+                    className="w-full bg-[#0f172a] dark:bg-indigo-600 text-white py-5 rounded-[24px] font-black text-[10px] uppercase tracking-[0.25em] shadow-lg flex items-center justify-center gap-3 active:scale-[0.975] transition-transform duration-150 ease-out disabled:opacity-40"
                   >
                     {isExecuting ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
                     Execute {selectedActions.size} Action{selectedActions.size !== 1 ? 's' : ''} <ArrowRight size={14} />
@@ -1590,7 +1590,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                 <div className="pt-2">
                   <button 
                     onClick={() => setShowPastActions(!showPastActions)}
-                    className="w-full flex items-center justify-between p-4 bg-slate-100 dark:bg-premium-card rounded-2xl active:scale-95 transition-all text-slate-600 dark:text-premium-muted hover:text-slate-900 border border-transparent dark:border-white/5"
+                    className="w-full flex items-center justify-between p-4 bg-slate-100 dark:bg-premium-card rounded-2xl active:scale-[0.975] transition-transform duration-150 ease-out text-slate-600 dark:text-premium-muted hover:text-slate-900 border border-transparent dark:border-white/5"
                   >
                     <span className="text-[10px] font-black uppercase tracking-widest">
                       View Past Actions ({pastActions.length})
@@ -1643,7 +1643,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                 setLexQuery('');
                 clearLexSession();
               }}
-              className="flex items-center gap-1.5 text-[9px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all active:scale-95"
+              className="flex items-center gap-1.5 text-[9px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-500/20 active:scale-[0.975] transition-transform duration-150 ease-out"
             >
               + New Chat
             </button>

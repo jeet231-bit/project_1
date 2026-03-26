@@ -165,14 +165,14 @@ const BudgetScreen: React.FC<BudgetScreenProps> = ({ onBack }) => {
       {/* Header */}
       <header className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <button onClick={onBack} className="w-10 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 flex items-center justify-center shadow-sm text-slate-600 dark:text-zinc-400 active:scale-95 transition-all">
+          <button onClick={onBack} className="w-10 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 flex items-center justify-center shadow-sm text-slate-600 dark:text-zinc-400 active:opacity-70 transition-colors">
             <ChevronLeft size={20} />
           </button>
           <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-50 tracking-tight">Budgets</h1>
         </div>
         <button
           onClick={() => setShowAddForm(true)}
-          className="bg-indigo-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all hover:bg-indigo-700"
+          className="bg-indigo-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg active:scale-[0.975] transition-transform duration-150 ease-out hover:bg-indigo-700"
         >
           <Plus size={20} />
         </button>
@@ -215,7 +215,7 @@ const BudgetScreen: React.FC<BudgetScreenProps> = ({ onBack }) => {
             <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-100">New Category Budget</h3>
-                <button onClick={() => setShowAddForm(false)} className="text-slate-400 active:scale-95"><X size={18} /></button>
+                <button onClick={() => setShowAddForm(false)} className="text-slate-400 active:opacity-70 transition-colors"><X size={18} /></button>
               </div>
               <div className="space-y-3">
                 <select
@@ -278,14 +278,14 @@ const BudgetScreen: React.FC<BudgetScreenProps> = ({ onBack }) => {
                     <button
                       onClick={() => handleUpdate(budget)}
                       disabled={loading}
-                      className="text-emerald-500 active:scale-95 transition-all"
+                      className="text-emerald-500 active:opacity-70 transition-colors"
                     >
                       <Check size={16} />
                     </button>
                   ) : (
                     <button
                       onClick={() => { setEditingId(budget.id); setEditLimit(String(budget.monthlyLimit)); }}
-                      className="text-slate-400 dark:text-zinc-500 active:scale-95 transition-all"
+                      className="text-slate-400 dark:text-zinc-500 active:opacity-70 transition-colors"
                     >
                       <Edit2 size={14} />
                     </button>
@@ -293,7 +293,7 @@ const BudgetScreen: React.FC<BudgetScreenProps> = ({ onBack }) => {
                   <button
                     onClick={() => handleDelete(budget.id)}
                     disabled={loading}
-                    className="text-slate-400 dark:text-zinc-500 hover:text-rose-500 active:scale-95 transition-all"
+                    className="text-slate-400 dark:text-zinc-500 hover:text-rose-500 active:opacity-70 transition-colors"
                   >
                     <Trash2 size={14} />
                   </button>

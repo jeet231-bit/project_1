@@ -407,7 +407,7 @@ const Chatbot: React.FC = () => {
                                 background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.accentLight}30`,
                                 color: C.accentLight, fontSize: 12, fontWeight: 500,
                                 cursor: 'pointer', textAlign: 'left', lineHeight: 1.3,
-                                transition: 'all 0.15s',
+                                transition: 'background-color 0.15s',
                               }}
                               onMouseEnter={e => { (e.target as HTMLElement).style.background = `${C.accent}20`; }}
                               onMouseLeave={e => { (e.target as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; }}

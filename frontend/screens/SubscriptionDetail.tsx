@@ -130,7 +130,7 @@ const SubscriptionDetail: React.FC<Props> = ({ subId, onBack }) => {
                 <button
                   key={c}
                   onClick={() => updateSubscription(sub.id, { billingCycle: c as any })}
-                  className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                  className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors duration-150 ${
                     sub.billingCycle === c
                       ? 'bg-white dark:bg-zinc-700 shadow-sm text-indigo-600 dark:text-indigo-400'
                       : 'text-slate-400'
@@ -147,7 +147,7 @@ const SubscriptionDetail: React.FC<Props> = ({ subId, onBack }) => {
           </div>
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Status</span>
-            <button onClick={() => setAutoPay(!autoPay)} className={`px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-[0.1em] transition-all shadow-sm ${autoPay ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-500'}`}>
+            <button onClick={() => setAutoPay(!autoPay)} className={`px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-[0.1em] transition-colors duration-150 shadow-sm active:scale-[0.975] ${autoPay ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-500'}`}>
               {autoPay ? 'Auto-pay Enabled' : 'Auto-pay Disabled'}
             </button>
           </div>
@@ -164,7 +164,7 @@ const SubscriptionDetail: React.FC<Props> = ({ subId, onBack }) => {
                 <button 
                   key={d} 
                   onClick={() => setRemindersDay(d)}
-                  className={`px-3 py-2 rounded-xl text-[10px] font-black transition-all ${remindersDay === d ? 'bg-white dark:bg-zinc-700 shadow-sm text-indigo-600' : 'text-slate-400'}`}
+                  className={`px-3 py-2 rounded-xl text-[10px] font-black transition-colors duration-150 ${remindersDay === d ? 'bg-white dark:bg-zinc-700 shadow-sm text-indigo-600' : 'text-slate-400'}`}
                 >
                   {d}d
                 </button>
@@ -186,14 +186,14 @@ const SubscriptionDetail: React.FC<Props> = ({ subId, onBack }) => {
         <div className="flex flex-col gap-4">
           <button 
             onClick={() => { updateSubscription(sub.id, { autoPay }); onBack(); }}
-            className="w-full bg-indigo-600 dark:bg-indigo-500 text-white py-6 rounded-[32px] font-black text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-4 active:scale-95 transition-all shadow-xl"
+            className="w-full bg-indigo-600 dark:bg-indigo-500 text-white py-6 rounded-[32px] font-black text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-4 active:scale-[0.975] transition-transform duration-150 ease-out shadow-xl"
           >
             Save Settings
           </button>
           
           <button 
             onClick={() => { cancelSubscription(sub.id); onBack(); }}
-            className="w-full bg-[#0f172a] dark:bg-zinc-100 text-white dark:text-[#0f172a] py-6 rounded-[32px] font-black text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-4 active:scale-95 transition-all shadow-xl"
+            className="w-full bg-[#0f172a] dark:bg-zinc-100 text-white dark:text-[#0f172a] py-6 rounded-[32px] font-black text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-4 active:scale-[0.975] transition-transform duration-150 ease-out shadow-xl"
           >
             <CircleAlert size={18} className="rotate-45" /> Cancel Commitment
           </button>

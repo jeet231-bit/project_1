@@ -23,10 +23,10 @@ const SplitScreen: React.FC = () => {
       <header className="flex justify-between items-center">
         <h1 className="text-2xl font-black text-slate-900 dark:text-premium-text tracking-tight">Shared Capital</h1>
         <div className="flex gap-2">
-          <button onClick={() => alert("Feature coming soon: Add Shared Expense")} className="w-10 h-10 bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 rounded-2xl flex items-center justify-center text-slate-800 dark:text-white active:scale-95 transition-all">
+          <button onClick={() => alert("Feature coming soon: Add Shared Expense")} className="w-10 h-10 bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 rounded-2xl flex items-center justify-center text-slate-800 dark:text-white active:opacity-70 transition-colors">
             <Plus size={18} />
           </button>
-          <button onClick={() => alert("Feature coming soon: Invite Friend to Group")} className="w-10 h-10 bg-[#0f172a] dark:bg-premium-card border border-white/5 rounded-2xl flex items-center justify-center text-white active:scale-95 transition-all">
+          <button onClick={() => alert("Feature coming soon: Invite Friend to Group")} className="w-10 h-10 bg-[#0f172a] dark:bg-premium-card border border-white/5 rounded-2xl flex items-center justify-center text-white active:opacity-70 transition-colors">
             <UserPlus size={18} />
           </button>
         </div>
@@ -43,8 +43,8 @@ const SplitScreen: React.FC = () => {
           </p>
           <h2 className="text-5xl font-black tracking-tighter">{mask(netBalance)}</h2>
           <div className="pt-6 flex gap-4">
-             <button className="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">Settle All</button>
-             <button className="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">Add Group</button>
+             <button className="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-[0.975] transition-transform duration-150 ease-out">Settle All</button>
+             <button className="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-[0.975] transition-transform duration-150 ease-out">Add Group</button>
           </div>
         </div>
       </div>
@@ -53,13 +53,13 @@ const SplitScreen: React.FC = () => {
       <div className="bg-white dark:bg-premium-card p-1 rounded-full flex border border-slate-100 dark:border-white/5">
         <button 
           onClick={() => setActiveTab('balances')}
-          className={`flex-1 py-3.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'balances' ? 'bg-[#0f172a] dark:bg-indigo-600 text-white shadow-lg' : 'text-slate-400'}`}
+          className={`flex-1 py-3.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-150 ${activeTab === 'balances' ? 'bg-[#0f172a] dark:bg-indigo-600 text-white shadow-lg' : 'text-slate-400'}`}
         >
           Balances
         </button>
         <button 
           onClick={() => setActiveTab('activity')}
-          className={`flex-1 py-3.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'activity' ? 'bg-[#0f172a] dark:bg-indigo-600 text-white shadow-lg' : 'text-slate-400'}`}
+          className={`flex-1 py-3.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors duration-150 ${activeTab === 'activity' ? 'bg-[#0f172a] dark:bg-indigo-600 text-white shadow-lg' : 'text-slate-400'}`}
         >
           Activity
         </button>
@@ -75,7 +75,7 @@ const SplitScreen: React.FC = () => {
             className="space-y-4"
           >
             {friends.map((friend) => (
-              <div key={friend.id} className="bg-white dark:bg-premium-card p-6 rounded-[36px] border border-slate-100 dark:border-white/5 shadow-sm flex items-center justify-between group hover:border-indigo-100 dark:hover:border-indigo-900 active:border-indigo-100 dark:active:border-indigo-900 transition-all active:scale-[0.98] cursor-pointer">
+              <motion.div key={friend.id} whileTap={{ scale: 0.985, transition: { type: "spring", stiffness: 300, damping: 24 } }} className="bg-white dark:bg-premium-card p-6 rounded-[36px] border border-slate-100 dark:border-white/5 shadow-sm flex items-center justify-between group hover:border-indigo-100 dark:hover:border-indigo-900 active:border-indigo-100 dark:active:border-indigo-900 transition-colors cursor-pointer">
                 <div className="flex items-center gap-5">
                   <div className="w-14 h-14 bg-slate-50 dark:bg-premium-dark rounded-[22px] flex items-center justify-center text-slate-400 dark:text-premium-muted font-black text-xl border border-slate-100 dark:border-white/5">
                     {friend.name.charAt(0)}
@@ -100,7 +100,7 @@ const SplitScreen: React.FC = () => {
                     </button>
                   )}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </motion.div>
         ) : (
@@ -117,9 +117,9 @@ const SplitScreen: React.FC = () => {
                 initial={{ opacity: 0, y: 15 }} 
                 animate={{ opacity: 1, y: 0 }} 
                 whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
-                whileTap={{ scale: 0.97, boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}
+                whileTap={{ scale: 0.985, transition: { type: "spring", stiffness: 300, damping: 24 } }}
                 transition={{ delay: i * 0.05 }} 
-                className="bg-white dark:bg-premium-card p-6 rounded-[2.5rem] border border-slate-100 dark:border-white/5 flex justify-between items-center group transition-all cursor-pointer active:scale-[0.98]"
+                className="bg-white dark:bg-premium-card p-6 rounded-[2.5rem] border border-slate-100 dark:border-white/5 flex justify-between items-center group transition-colors cursor-pointer"
               >
                 <div className="flex gap-4 items-center">
                   <div className="w-14 h-14 rounded-3xl bg-slate-50 dark:bg-premium-dark flex items-center justify-center text-slate-400 dark:text-premium-muted/50 text-xl border border-slate-100 dark:border-white/5 shrink-0 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 group-hover:text-indigo-600 group-active:bg-indigo-50 dark:group-active:bg-indigo-500/10 group-active:text-indigo-600 transition-colors">

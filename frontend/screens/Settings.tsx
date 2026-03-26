@@ -25,8 +25,8 @@ const Settings: React.FC = () => {
   };
 
   const Toggle = ({ active, onToggle }: { active: boolean, onToggle: () => void }) => (
-    <button onClick={onToggle} className={`w-11 h-6 rounded-full relative transition-colors duration-300 ${active ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-zinc-800'}`}>
-      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${active ? 'left-6' : 'left-1'}`}></div>
+    <button onClick={onToggle} className={`w-11 h-6 rounded-full relative transition-colors duration-200 ${active ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-zinc-800'}`}>
+      <motion.div animate={{ x: active ? 20 : 0 }} transition={{ type: "spring", stiffness: 500, damping: 30 }} className="absolute top-1 left-1 w-4 h-4 rounded-full bg-white"></motion.div>
     </button>
   );
 
@@ -234,7 +234,7 @@ const Settings: React.FC = () => {
                           <button
                             onClick={item.onClick}
                             disabled={loading === item.id}
-                            className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-all active:scale-[0.98] text-left"
+                            className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-zinc-800/50 active:scale-[0.985] transition-transform duration-150 ease-out text-left"
                           >
                             <div className={`${item.bg} p-2.5 rounded-xl ${item.color}`}>
                               {loading === item.id
@@ -445,7 +445,7 @@ const Settings: React.FC = () => {
 
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-3 py-4 text-rose-500 font-black uppercase text-[10px] tracking-widest"
+          className="w-full flex items-center justify-center gap-3 py-4 text-rose-500 font-black uppercase text-[10px] tracking-widest active:opacity-70 transition-colors"
         >
           <LogOut size={16} /> Sign Out
         </button>

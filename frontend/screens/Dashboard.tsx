@@ -25,6 +25,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [showExplainer, setShowExplainer] = useState<string | null>(null);
   const [showAddBank, setShowAddBank] = useState(false);
   const [newBank, setNewBank] = useState({ bankName: '', accountType: 'Savings', balance: '', lastFour: '' });
+  const [isEditingAccounts, setIsEditingAccounts] = useState(false);
+  const [editingBankId, setEditingBankId] = useState<string | null>(null);
 
   const [lexQuery, setLexQuery] = useState('');
   const [lexResponse, setLexResponse] = useState<string | null>(null);
@@ -244,34 +246,35 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
   const handleAddBank = async () => {
     if (!newBank.bankName || !newBank.lastFour || !newBank.balance) return;
+    const newAcc = {
+      id: editingBankId || Math.random().toString(36).substr(2, 9),
+      bankName: newBank.bankName,
+      accountType: newBank.accountType,
+      balance: parseFloat(newBank.balance),
+      lastFour: newBank.lastFour,
+    };
+    
+    if (editingBankId) {
+       setBankAccounts(bankAccounts.map(b => b.id === editingBankId ? newAcc : b));
+    } else {
+       setBankAccounts([...bankAccounts, newAcc]);
+    }
+    
     try {
-      const res = await api.post('/bank-accounts', {
-        bank_name: newBank.bankName,
-        account_type: newBank.accountType,
-        balance: parseFloat(newBank.balance),
-        last_four: newBank.lastFour,
-      });
-      if (res?.id) {
-        setBankAccounts([...bankAccounts, {
-          id: String(res.id),
-          bankName: newBank.bankName,
-          accountType: newBank.accountType,
+      if (!editingBankId) {
+        await api.post('/bank-accounts', {
+          bank_name: newBank.bankName,
+          account_type: newBank.accountType,
           balance: parseFloat(newBank.balance),
-          lastFour: newBank.lastFour,
-        }]);
+          last_four: newBank.lastFour,
+        });
       }
     } catch (err) {
-      console.error('Failed to add bank account:', err);
-      setBankAccounts([...bankAccounts, {
-        id: Math.random().toString(36).substr(2, 9),
-        bankName: newBank.bankName,
-        accountType: newBank.accountType,
-        balance: parseFloat(newBank.balance),
-        lastFour: newBank.lastFour,
-      }]);
+      console.error('Failed to sync bank account with server:', err);
     }
     setNewBank({ bankName: '', accountType: 'Savings', balance: '', lastFour: '' });
     setShowAddBank(false);
+    setEditingBankId(null);
   };
 
   return (
@@ -317,7 +320,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <div className="flex gap-2">
           <button
             onClick={toggleSecureMode}
-            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-slate-500 dark:text-premium-muted active:scale-90 transition-all hover:border-indigo-200 dark:hover:border-indigo-500/30 group"
+            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-slate-500 dark:text-premium-muted active:opacity-70 transition-colors hover:border-indigo-200 dark:hover:border-indigo-500/30 group"
           >
             {isSecureMode
               ? <EyeOff size={16} className="group-hover:text-indigo-500 transition-colors" />
@@ -326,7 +329,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </button>
           <button
             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-slate-500 dark:text-premium-muted active:scale-90 transition-all hover:border-amber-200 dark:hover:border-amber-500/30 group"
+            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-slate-500 dark:text-premium-muted active:opacity-70 transition-colors hover:border-amber-200 dark:hover:border-amber-500/30 group"
           >
             {theme === 'light'
               ? <Moon size={16} className="group-hover:text-amber-500 transition-colors" />
@@ -335,7 +338,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </button>
           <button
             onClick={() => signOutExplicitly()}
-            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-rose-400 active:scale-90 transition-all hover:border-rose-200 dark:hover:border-rose-500/30 hover:text-rose-500 group"
+            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-rose-400 active:opacity-70 transition-colors hover:border-rose-200 dark:hover:border-rose-500/30 hover:text-rose-500 group"
             title="Sign Out"
           >
             <Power size={16} />
@@ -383,7 +386,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     >
                       <button
                         onClick={() => handleDismissAlert(alert.id)}
-                        className="absolute top-3 right-3 p-1.5 rounded-xl opacity-0 group-hover:opacity-100 group-active:opacity-100 hover:bg-black/5 dark:hover:bg-white/5 active:bg-black/5 dark:active:bg-white/5 transition-all"
+                        className="absolute top-3 right-3 p-1.5 rounded-xl opacity-0 group-hover:opacity-100 active:opacity-70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                       >
                         <X size={12} className="text-slate-400" />
                       </button>
@@ -506,17 +509,24 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <div className="flex justify-between items-center px-1">
           <div className="flex items-center gap-2">
             <h3 className="text-slate-900 dark:text-premium-text font-black text-[10px] uppercase tracking-[0.2em]">Linked Liquidity</h3>
-            <button onClick={() => setShowExplainer('liquidity')}><Info size={10} className="text-slate-400" /></button>
+            <button onClick={() => setShowExplainer('liquidity')} className="active:scale-[0.85] transition-transform"><Info size={12} className="text-slate-400" /></button>
           </div>
-          <button onClick={() => setShowAddBank(true)} className="text-indigo-600 dark:text-indigo-400 text-[10px] font-bold cursor-pointer hover:opacity-70 active:scale-95 transition-all">+ Connect</button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setIsEditingAccounts(!isEditingAccounts)} className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isEditingAccounts ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-premium-muted hover:bg-slate-200 dark:hover:bg-white/10'}`}>
+              {isEditingAccounts ? <Check size={14} /> : <Edit2 size={14} />}
+            </button>
+            <button onClick={() => { setNewBank({ bankName: '', accountType: 'Savings', balance: '', lastFour: '' }); setEditingBankId(null); setShowAddBank(true); }} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-premium-muted hover:bg-slate-200 dark:hover:bg-white/10 active:scale-[0.975] transition-transform">
+              <Plus size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Add Bank Account Form */}
         <AnimatePresence>
           {showAddBank && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-              <div className="bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 p-5 rounded-[28px] space-y-3 mb-2">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Link New Account</p>
+              <div className="bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 p-5 rounded-[28px] space-y-3 mb-2 shadow-sm">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">{editingBankId ? 'Edit Account' : 'Link New Account'}</p>
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     placeholder="Bank Name"
@@ -552,9 +562,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 <div className="flex gap-2 pt-1">
                   <button
                     onClick={handleAddBank}
-                    className="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
+                    className="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-[0.975] transition-transform duration-150 ease-out"
                   >
-                    Link Account
+                    {editingBankId ? 'Save Changes' : 'Link Account'}
                   </button>
                   <button
                     onClick={() => setShowAddBank(false)}
@@ -581,37 +591,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 px-1">
           {/* Cash Wallet card */}
-          <div className="min-w-[170px] bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 hover:border-indigo-100 dark:hover:border-indigo-900 active:border-indigo-100 dark:active:border-indigo-900 transition-all shrink-0">
+          <div className={`min-w-[170px] bg-white dark:bg-premium-card border ${isEditingAccounts ? 'border-dashed border-indigo-300 dark:border-indigo-500/50 outline outline-4 outline-indigo-50 dark:outline-indigo-500/10' : 'border-slate-100 dark:border-white/5'} p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 transition-colors shrink-0`}>
             <div className="flex justify-between items-start">
               <div className="w-9 h-9 rounded-2xl flex items-center justify-center text-xs bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">
                 <Wallet size={16} />
               </div>
-              {isEditingCash ? (
-                <button
-                  onClick={() => { updateCashBalance(parseFloat(cashEditVal) || 0); setIsEditingCash(false); }}
-                  className="p-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 active:bg-emerald-100 dark:active:bg-emerald-500/20 transition-colors"
-                >
-                  <Check size={12} className="text-emerald-600 dark:text-emerald-400" />
-                </button>
-              ) : (
-                <button
-                  onClick={() => { setIsEditingCash(true); setCashEditVal(cashBalance.currentBalance.toString()); }}
-                  className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 active:bg-slate-100 dark:active:bg-white/5 transition-colors"
-                >
-                  <Edit2 size={12} className="text-slate-400" />
-                </button>
-              )}
             </div>
             <div>
               <p className="text-slate-400 dark:text-premium-muted/50 text-[9px] font-black uppercase tracking-widest leading-none mb-1">Cash Wallet</p>
-              {isEditingCash ? (
+              {isEditingAccounts ? (
                 <input
-                  autoFocus
                   type="number"
-                  value={cashEditVal}
-                  onChange={e => setCashEditVal(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') { updateCashBalance(parseFloat(cashEditVal) || 0); setIsEditingCash(false); } }}
-                  className="text-xl font-black text-slate-900 dark:text-premium-text tracking-tight bg-transparent outline-none border-b border-indigo-400 w-full"
+                  value={cashBalance.currentBalance}
+                  onChange={e => updateCashBalance(parseFloat(e.target.value) || 0)}
+                  className="text-xl font-black text-slate-900 dark:text-premium-text tracking-tight bg-transparent outline-none border-b border-indigo-400 dark:border-indigo-500/50 w-full"
                 />
               ) : (
                 <p className="text-xl font-black text-slate-900 dark:text-premium-text tracking-tight">{mask(cashBalance.currentBalance)}</p>
@@ -629,15 +622,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               return true;
             });
           })().map((acc, i) => (
-            <div key={acc.id} className="min-w-[170px] bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 hover:border-indigo-100 dark:hover:border-indigo-900 active:border-indigo-100 dark:active:border-indigo-900 transition-all shrink-0 active:scale-95">
+            <div key={acc.id} onClick={() => { if(isEditingAccounts) { setEditingBankId(acc.id); setNewBank({bankName: acc.bankName, accountType: acc.accountType, balance: String(acc.balance), lastFour: acc.lastFour}); setShowAddBank(true); } }} className={`min-w-[170px] bg-white dark:bg-premium-card border ${isEditingAccounts ? 'border-dashed border-indigo-300 dark:border-indigo-500/50 outline outline-4 outline-indigo-50 dark:outline-indigo-500/10 cursor-pointer active:scale-[0.985] transition-transform' : 'border-slate-100 dark:border-white/5'} p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 transition-colors shrink-0 relative overflow-hidden group`}>
+              {isEditingAccounts && (
+                 <button onClick={(e) => { e.stopPropagation(); setBankAccounts(bankAccounts.filter(b => b.id !== acc.id)); }} className="absolute top-0 right-0 p-3 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white rounded-bl-3xl transition-colors">
+                    <X size={12} strokeWidth={3} />
+                 </button>
+              )}
               <div className="flex justify-between items-start">
                 <div className={`w-9 h-9 rounded-2xl flex items-center justify-center text-xs ${acc.accountType === 'Digital' ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'}`}>
                   {acc.accountType === 'Digital' ? <Wallet size={16} /> : <Building2 size={16} />}
                 </div>
-                <span className="text-slate-300 dark:text-premium-muted/30 text-[10px] font-bold">{`•••• ${acc.lastFour}`}</span>
+                {!isEditingAccounts && <span className="text-slate-300 dark:text-premium-muted/30 text-[10px] font-bold">{`•••• ${acc.lastFour}`}</span>}
               </div>
               <div>
-                <p className="text-slate-400 dark:text-premium-muted/50 text-[9px] font-black uppercase tracking-widest leading-none mb-1">{acc.bankName}</p>
+                <p className="text-slate-400 dark:text-premium-muted/50 text-[9px] font-black uppercase tracking-widest leading-none mb-1 flex items-center gap-1">{acc.bankName} {isEditingAccounts && <Edit2 size={8} />}</p>
                 <p className="text-xl font-black text-slate-900 dark:text-premium-text tracking-tight">{mask(acc.balance)}</p>
               </div>
             </div>
@@ -678,7 +676,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       </section>
 
       {/* Portfolio Outflow Metrics Card */}
-      <section className="bg-[#0f172a] dark:bg-premium-card p-8 rounded-[3rem] text-white relative overflow-hidden shadow-2xl shadow-slate-300 dark:shadow-none transition-all hover:scale-[1.01] active:scale-[0.99]">
+      <section className="bg-[#0f172a] dark:bg-premium-card p-8 rounded-[3rem] text-white relative overflow-hidden shadow-2xl shadow-[#0f172a]/20 dark:shadow-none hover:scale-[1.015] active:scale-[0.985] hover:shadow-3xl transition-all duration-300 ease-out cursor-pointer group hover:bg-[#152033] dark:hover:bg-premium-dark border border-transparent dark:border-white/5">
         <div className="relative z-10 flex flex-col gap-6">
           <div className="flex justify-between items-start">
             <div>
@@ -753,7 +751,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 setLexQuery('');
                 setConversationId(null);
               }}
-              className="flex items-center gap-1.5 text-[9px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all active:scale-95"
+              className="flex items-center gap-1.5 text-[9px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-500/20 active:scale-[0.975] transition-transform duration-150 ease-out"
             >
               + New Chat
             </button>
@@ -762,7 +760,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <div className="bg-slate-50 dark:bg-premium-card border border-slate-100 dark:border-white/5 p-6 rounded-[36px] shadow-inner space-y-4 relative overflow-hidden">
           <div className="flex gap-2">
             <input className="flex-1 bg-white dark:bg-premium-dark border border-slate-100 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm focus:ring-1 focus:ring-indigo-500 outline-none dark:text-premium-text transition-all" placeholder="Where is my money going?" value={lexQuery} onChange={(e) => setLexQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleLexQuery()} />
-            <button onClick={handleLexQuery} disabled={isLexLoading} className="bg-[#0f172a] dark:bg-indigo-600 text-white p-3.5 rounded-2xl shadow-lg active:scale-90 transition-all disabled:opacity-50">
+            <button onClick={handleLexQuery} disabled={isLexLoading} className="bg-[#0f172a] dark:bg-indigo-600 text-white p-3.5 rounded-2xl shadow-lg active:scale-[0.975] transition-transform duration-150 ease-out disabled:opacity-50">
               {isLexLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
             </button>
           </div>
@@ -780,7 +778,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     }
                     onNavigate(lexSuggestion.target);
                   }}
-                  className="w-full flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl group transition-all active:scale-95 border border-indigo-100/50 dark:border-indigo-500/20"
+                  className="w-full flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10 p-3 rounded-xl group active:opacity-70 transition-colors border border-indigo-100/50 dark:border-indigo-500/20"
                 >
                   <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-400">{lexSuggestion.text}</span>
                   <ArrowRight size={12} className="text-indigo-500 group-hover:translate-x-1 transition-transform" />
@@ -797,7 +795,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       </section>
 
       {/* EMI Card */}
-      <button onClick={() => onNavigate('emis')} className="w-full bg-[#0f172a] dark:bg-premium-card rounded-[40px] p-8 text-white flex items-center justify-between shadow-2xl active:scale-[0.98] transition-all hover:bg-slate-900 dark:hover:bg-premium-card/80">
+      <button onClick={() => onNavigate('emis')} className="w-full bg-[#0f172a] dark:bg-premium-card rounded-[40px] p-8 text-white flex items-center justify-between shadow-2xl active:scale-[0.985] transition-transform duration-150 ease-out hover:bg-slate-900 dark:hover:bg-premium-card/80">
         <div className="flex items-center gap-6 text-left">
           <div className="bg-white/10 dark:bg-indigo-500/10 p-4 rounded-2xl text-white dark:text-indigo-400"><Calendar size={24} /></div>
           <div>
@@ -874,7 +872,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </div>
           <button
             onClick={() => onNavigate('categoryLogs')}
-            className="w-full flex items-center justify-center gap-2 text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest pt-5 border-t border-slate-50 dark:border-white/5 active:scale-95 transition-all"
+            className="w-full flex items-center justify-center gap-2 text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest pt-5 border-t border-slate-50 dark:border-white/5 active:scale-[0.975] transition-transform duration-150 ease-out"
           >
             View full spend logs <ArrowRight size={12} />
           </button>
@@ -892,7 +890,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               setLexTargetBucket('action');
               onNavigate('insights');
             }}
-            className="bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/10 p-7 rounded-[40px] flex items-center justify-between group active:scale-95 transition-all cursor-pointer"
+            className="bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/10 p-7 rounded-[40px] flex items-center justify-between group active:scale-[0.985] transition-transform duration-150 cursor-pointer"
           >
             <div className="flex items-center gap-6">
               <div className="bg-white dark:bg-premium-dark p-4 rounded-2xl shadow-sm text-emerald-500"><TrendingUp size={24} /></div>
@@ -964,7 +962,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             </ResponsiveContainer>
           </div>
 
-          <button className="w-full bg-violet-600 hover:bg-violet-700 text-white py-5 rounded-[24px] font-black text-[10px] uppercase tracking-[0.25em] shadow-xl shadow-violet-200 dark:shadow-none flex items-center justify-center gap-3 transition-all relative z-10 active:scale-95">
+          <button className="w-full bg-violet-600 hover:bg-violet-700 text-white py-5 rounded-[24px] font-black text-[10px] uppercase tracking-[0.25em] shadow-xl shadow-violet-200 dark:shadow-none flex items-center justify-center gap-3 active:scale-[0.975] transition-transform duration-150 ease-out relative z-10">
             Deploy Idle Capital <ArrowUpRight size={16} />
           </button>
         </div>

@@ -239,10 +239,10 @@ const App: React.FC = () => {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id as any)}
-                  className={`flex flex-col items-center justify-center transition-all duration-300 relative p-2 ${activeTab === item.id ? 'text-white' : 'text-slate-500'
+                  className={`flex flex-col items-center justify-center transition-colors relative p-2 ${activeTab === item.id ? 'text-white' : 'text-slate-500'
                     }`}
                 >
-                  <div className={`${activeTab === item.id ? 'bg-white/10 p-2.5 rounded-2xl scale-110 shadow-inner' : ''} transition-all`}>
+                  <div className={`${activeTab === item.id ? 'bg-white/10 p-2.5 rounded-2xl scale-110 shadow-inner' : ''} transition-all duration-200`}>
                     <item.icon size={20} strokeWidth={activeTab === item.id ? 2.5 : 2} />
                   </div>
                   {activeTab === item.id && (
@@ -252,7 +252,7 @@ const App: React.FC = () => {
               ))}
               <button
                 onClick={() => setActiveTab('settings')}
-                className={`p-2 transition-all ${activeTab === 'settings' ? 'text-white' : 'text-slate-500'}`}
+                className={`p-2 transition-colors ${activeTab === 'settings' ? 'text-white' : 'text-slate-500'}`}
               >
                 <SettingsIcon size={20} strokeWidth={activeTab === 'settings' ? 2.5 : 2} />
               </button>

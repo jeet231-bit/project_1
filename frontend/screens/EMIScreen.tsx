@@ -39,12 +39,12 @@ const EMIScreen: React.FC<EMIScreenProps> = ({ onBack }) => {
     <div className="p-6 pt-10 space-y-8 min-h-screen bg-slate-50 dark:bg-zinc-950 pb-32">
       <header className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <button onClick={onBack} className="w-10 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 flex items-center justify-center shadow-sm text-slate-600 dark:text-zinc-400 active:scale-95 transition-all"><ChevronLeft size={20} /></button>
+          <button onClick={onBack} className="w-10 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 flex items-center justify-center shadow-sm text-slate-600 dark:text-zinc-400 active:opacity-70 transition-colors"><ChevronLeft size={20} /></button>
           <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-50 tracking-tight">Debt Intelligence</h1>
         </div>
         <button
           onClick={() => setShowAddForm(true)}
-          className="bg-indigo-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all hover:bg-indigo-700"
+          className="bg-indigo-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg active:scale-[0.975] transition-transform duration-150 ease-out hover:bg-indigo-700"
         >
           <Plus size={20} />
         </button>
@@ -106,7 +106,7 @@ const EMIScreen: React.FC<EMIScreenProps> = ({ onBack }) => {
               </div>
               <button
                 onClick={handleAddEmi}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all shadow-lg"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-[0.975] transition-transform duration-150 ease-out shadow-lg"
               >
                 Add EMI
               </button>
@@ -121,7 +121,7 @@ const EMIScreen: React.FC<EMIScreenProps> = ({ onBack }) => {
           <h3 className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Loan Portfolio</h3>
           <button
             onClick={() => setShowAddForm(true)}
-            className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-1 active:scale-95 transition-all"
+            className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-1 active:opacity-70 transition-colors"
           >
             Add New EMI <Plus size={10}/>
           </button>
@@ -144,7 +144,7 @@ const EMIScreen: React.FC<EMIScreenProps> = ({ onBack }) => {
             </div>
             <button
               onClick={() => setShowAddForm(true)}
-              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all shadow-lg"
+              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-[0.975] transition-transform duration-150 ease-out shadow-lg"
             >
               <Plus size={14} /> Add Your First EMI
             </button>
