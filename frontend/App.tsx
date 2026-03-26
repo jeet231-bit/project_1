@@ -85,9 +85,16 @@ const App: React.FC = () => {
       try {
         const res = await api.get('/onboarding/status');
         console.log('DEBUG: Onboarding status:', res);
-        // Existing user with any data → go to app; only brand-new (zero data) → onboarding
-        const hasAnyData = (res.counts?.income || 0) + (res.counts?.subscriptions || 0) + (res.counts?.expenses || 0) > 0;
-        if (res.is_complete || hasAnyData) {
+        const isLocallyFinished = localStorage.getItem('onboarding_passed') === 'true';
+        const activeLocalStep = localStorage.getItem('onboarding_step');
+
+        if (isLocallyFinished) {
+          setStage('app');
+        } else if (activeLocalStep !== null && activeLocalStep !== '5') {
+          // They are mid-onboarding locally
+          setStage('onboarding');
+        } else if (res.has_income && res.has_expenses) {
+          // Returning user logging in on new device
           setStage('app');
         } else {
           setStage('onboarding');
@@ -199,7 +206,10 @@ const App: React.FC = () => {
   if (stage === 'onboarding') {
     return (
       <OnboardingScreen
-        onComplete={() => setStage('insightReveal')}
+        onComplete={() => {
+          localStorage.setItem('onboarding_passed', 'true');
+          setStage('insightReveal');
+        }}
       />
     );
   }

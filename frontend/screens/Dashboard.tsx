@@ -320,7 +320,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <div className="flex gap-2">
           <button
             onClick={toggleSecureMode}
-            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-slate-500 dark:text-premium-muted active:opacity-70 transition-colors hover:border-indigo-200 dark:hover:border-indigo-500/30 group"
+            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-slate-500 dark:text-premium-muted active:scale-[0.85] transition-transform duration-150 ease-out hover:border-indigo-200 dark:hover:border-indigo-500/30 group"
           >
             {isSecureMode
               ? <EyeOff size={16} className="group-hover:text-indigo-500 transition-colors" />
@@ -329,7 +329,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </button>
           <button
             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-slate-500 dark:text-premium-muted active:opacity-70 transition-colors hover:border-amber-200 dark:hover:border-amber-500/30 group"
+            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-slate-500 dark:text-premium-muted active:scale-[0.85] transition-transform duration-150 ease-out hover:border-amber-200 dark:hover:border-amber-500/30 group"
           >
             {theme === 'light'
               ? <Moon size={16} className="group-hover:text-amber-500 transition-colors" />
@@ -338,7 +338,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </button>
           <button
             onClick={() => signOutExplicitly()}
-            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-rose-400 active:opacity-70 transition-colors hover:border-rose-200 dark:hover:border-rose-500/30 hover:text-rose-500 group"
+            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-rose-400 active:scale-[0.85] transition-transform duration-150 ease-out hover:border-rose-200 dark:hover:border-rose-500/30 hover:text-rose-500 group"
             title="Sign Out"
           >
             <Power size={16} />

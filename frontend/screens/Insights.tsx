@@ -745,7 +745,6 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                   <div className="space-y-3">
                     <p className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] px-1">Recurring Subscriptions</p>
                     {activeSubs.map((sub, i) => {
-                      const monthlyAmount = sub.billingCycle === 'yearly' ? Math.round(sub.amount / 12) : sub.amount;
                       return (
                         <motion.div
                           key={sub.id}
@@ -765,8 +764,8 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-black text-slate-900 dark:text-premium-text text-sm">₹{monthlyAmount.toLocaleString()}</p>
-                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">/mo</p>
+                            <p className="font-black text-slate-900 dark:text-premium-text text-sm">₹{sub.amount.toLocaleString()}</p>
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">/{sub.billingCycle === 'yearly' ? 'yr' : 'mo'}</p>
                           </div>
                         </motion.div>
                       );
