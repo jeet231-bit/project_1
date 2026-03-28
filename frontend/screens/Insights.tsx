@@ -20,9 +20,9 @@ interface InsightsProps {
 const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
   const {
     userName, subscriptions, expenses, emis, bankAccounts, isSecureMode,
-    lexHistory: globalLexHistory, setLexHistory, appendLexMessages, 
+    lexHistory: globalLexHistory, setLexHistory, appendLexMessages,
     lexTargetBucket, setLexTargetBucket, clearLexSession,
-    pendingActions, pastActions, actionResults, 
+    pendingActions, pastActions, actionResults,
     setPendingActions, appendPendingActions, addPastActions, setActionResults,
     conversationId, setConversationId, modelTier,
     proactiveAlerts, dismissAlert, markAlertRead, maturityForecast
@@ -228,7 +228,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
       const response = await api.post('/actions/execute', { actions: actionsToRun });
       setActionResults(response.results || []);
       setExecutionSummary(response.summary || 'Execution complete.');
-      
+
       // Calculate which ones succeeded to add to history
       const successfulLabels = new Set((response.results || []).filter((r: any) => r.status === 'success').map((r: any) => r.label));
       const successfulActions = actionsToRun.filter(a => successfulLabels.has(a.label));
@@ -273,7 +273,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
           {activeBucket === 'money' && (() => {
             const currentMonth = new Date().getMonth();
             const currentYear = new Date().getFullYear();
-            
+
             const monthlyExpenses = expenses.filter(e => {
               if (!e.date) return false;
               const d = new Date(e.date);
@@ -288,375 +288,376 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
             const totalMonthlyOutflow = monthlyExpenses + activeSubsMonthly + activeEmisMonthly;
 
             return (
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className="p-8 rounded-[40px] bg-indigo-600 text-white flex-1 space-y-4 shadow-xl">
-                  <p className="text-[9px] font-black uppercase tracking-[0.25em] opacity-60 flex items-center gap-1.5">
-                    Money Intelligence <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'outflow' ? null : 'outflow')} className="cursor-help p-2 -m-2"><Info size={10} className="text-white/50" /></button>
-                  </p>
-                  <h3 className="text-3xl font-black tracking-tighter">₹{Math.round(totalMonthlyOutflow).toLocaleString()}</h3>
-                  <p className="text-[9px] font-bold opacity-60 uppercase">Total computed outflow for this month.</p>
-                  <AnimatePresence>
-                    {showMoneyInfo === 'outflow' && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
-                        <p className="text-[10px] font-medium leading-relaxed text-white/70">Sum of all expenses, active subscriptions (annuals prorated monthly), and fixed EMIs for the current calendar month.</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-
-              {/* ══ Financial Maturity Index — Hero Card ══ */}
-              {behaviorLoading && (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 size={20} className="animate-spin text-indigo-500" />
-                  <span className="ml-3 text-[10px] font-bold text-slate-400">Loading intelligence...</span>
-                </div>
-              )}
-              {!behaviorLoading && behaviorMetrics?.financial_maturity && (
-                <motion.section
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                  className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 rounded-[40px] p-8 text-white shadow-2xl relative"
-                >
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-400/10 rounded-full blur-2xl pointer-events-none" />
-                  <div className="flex items-center gap-2 mb-5">
-                    <Brain size={16} className="text-indigo-200" />
-                    <p className="text-[9px] font-black uppercase tracking-[0.25em] text-indigo-200 flex items-center gap-1.5">
-                      Financial Maturity Index <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'maturity' ? null : 'maturity')} className="cursor-help p-2 -m-2"><Info size={10} className="text-indigo-300/60" /></button>
+              <div className="space-y-6">
+                <div className="flex gap-4">
+                  <div className="p-8 rounded-[40px] bg-indigo-600 text-white flex-1 space-y-4 shadow-xl">
+                    <p className="text-[9px] font-black uppercase tracking-[0.25em] opacity-60 flex items-center gap-1.5">
+                      Money Intelligence <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'outflow' ? null : 'outflow')} className="cursor-help p-2 -m-2"><Info size={10} className="text-white/50" /></button>
                     </p>
+                    <h3 className="text-3xl font-black tracking-tighter">₹{Math.round(totalMonthlyOutflow).toLocaleString()}</h3>
+                    <p className="text-[9px] font-bold opacity-60 uppercase">Total computed outflow for this month.</p>
+                    <AnimatePresence>
+                      {showMoneyInfo === 'outflow' && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+                          <p className="text-[10px] font-medium leading-relaxed text-white/70">Sum of all expenses, active subscriptions (annuals prorated monthly), and fixed EMIs for the current calendar month.</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
-                  <AnimatePresence>
-                    {showMoneyInfo === 'maturity' && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mb-4">
-                        <p className="text-[10px] font-medium leading-relaxed text-indigo-200/80">A composite score (0–100) computed from spend consistency, category diversification, subscription burden, and savings behavior over the past 90 days.</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  <div className="flex items-end gap-4 mb-4">
-                    <span className="text-6xl font-black tracking-tighter leading-none">{behaviorMetrics.financial_maturity.maturity_index}</span>
-                    <div className="mb-2">
-                      <p className="text-sm font-black leading-tight">
-                        {behaviorClassification?.maturity_label || behaviorMetrics.financial_maturity.classification}
+                </div>
+
+                {/* ══ Financial Maturity Index — Hero Card ══ */}
+                {behaviorLoading && (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 size={20} className="animate-spin text-indigo-500" />
+                    <span className="ml-3 text-[10px] font-bold text-slate-400">Loading intelligence...</span>
+                  </div>
+                )}
+                {!behaviorLoading && behaviorMetrics?.financial_maturity && (
+                  <motion.section
+                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                    className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 rounded-[40px] p-8 text-white shadow-2xl relative"
+                  >
+                    <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-400/10 rounded-full blur-2xl pointer-events-none" />
+                    <div className="flex items-center gap-2 mb-5">
+                      <Brain size={16} className="text-indigo-200" />
+                      <p className="text-[9px] font-black uppercase tracking-[0.25em] text-indigo-200 flex items-center gap-1.5">
+                        Financial Maturity Index <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'maturity' ? null : 'maturity')} className="cursor-help p-2 -m-2"><Info size={10} className="text-indigo-300/60" /></button>
                       </p>
-                      {behaviorClassification?.maturity_tone && (
-                        <p className={`text-[9px] font-black uppercase tracking-widest mt-1 ${behaviorClassification.maturity_tone === 'positive' ? 'text-emerald-300' :
+                    </div>
+                    <AnimatePresence>
+                      {showMoneyInfo === 'maturity' && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mb-4">
+                          <p className="text-[10px] font-medium leading-relaxed text-indigo-200/80">A composite score (0–100) computed from spend consistency, category diversification, subscription burden, and savings behavior over the past 90 days.</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <div className="flex items-end gap-4 mb-4">
+                      <span className="text-6xl font-black tracking-tighter leading-none">{behaviorMetrics.financial_maturity.maturity_index}</span>
+                      <div className="mb-2">
+                        <p className="text-sm font-black leading-tight">
+                          {behaviorClassification?.maturity_label || behaviorMetrics.financial_maturity.classification}
+                        </p>
+                        {behaviorClassification?.maturity_tone && (
+                          <p className={`text-[9px] font-black uppercase tracking-widest mt-1 ${behaviorClassification.maturity_tone === 'positive' ? 'text-emerald-300' :
                             behaviorClassification.maturity_tone === 'critical' ? 'text-rose-300' :
                               behaviorClassification.maturity_tone === 'cautionary' ? 'text-amber-300' :
                                 'text-indigo-200'
-                          }`}>{behaviorClassification.maturity_tone}</p>
-                      )}
+                            }`}>{behaviorClassification.maturity_tone}</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  {/* Component breakdown mini-bars */}
-                  <div className="grid grid-cols-5 gap-1.5 mt-4">
-                    {Object.entries(behaviorMetrics.financial_maturity.components || {}).map(([key, val]: [string, any]) => (
-                      <div key={key} className="space-y-1">
-                        <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
-                          <div className="h-full rounded-full bg-white/60" style={{ width: `${val}%` }} />
+                    {/* Component breakdown mini-bars */}
+                    <div className="grid grid-cols-5 gap-1.5 mt-4">
+                      {Object.entries(behaviorMetrics.financial_maturity.components || {}).map(([key, val]: [string, any]) => (
+                        <div key={key} className="space-y-1">
+                          <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-white/60" style={{ width: `${val}%` }} />
+                          </div>
+                          <p className="text-[7px] font-bold text-indigo-200 uppercase tracking-wider text-center truncate">
+                            {key.replace(/_/g, ' ').replace('spend ', '').replace('category ', '')}
+                          </p>
                         </div>
-                        <p className="text-[7px] font-bold text-indigo-200 uppercase tracking-wider text-center truncate">
-                          {key.replace(/_/g, ' ').replace('spend ', '').replace('category ', '')}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                  {/* Strengths & Weaknesses tags */}
-                  <div className="flex flex-wrap gap-1.5 mt-5">
-                    {behaviorMetrics.financial_maturity.strengths?.map((s: string, i: number) => (
-                      <span key={`s-${i}`} className="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-[8px] font-black text-emerald-200 uppercase tracking-wider">{s}</span>
-                    ))}
-                    {behaviorMetrics.financial_maturity.weaknesses?.map((w: string, i: number) => (
-                      <span key={`w-${i}`} className="px-2.5 py-1 rounded-xl bg-rose-500/20 text-[8px] font-black text-rose-200 uppercase tracking-wider">{w}</span>
-                    ))}
-                  </div>
-                </motion.section>
-              )}
+                      ))}
+                    </div>
+                    {/* Strengths & Weaknesses tags */}
+                    <div className="flex flex-wrap gap-1.5 mt-5">
+                      {behaviorMetrics.financial_maturity.strengths?.map((s: string, i: number) => (
+                        <span key={`s-${i}`} className="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-[8px] font-black text-emerald-200 uppercase tracking-wider">{s}</span>
+                      ))}
+                      {behaviorMetrics.financial_maturity.weaknesses?.map((w: string, i: number) => (
+                        <span key={`w-${i}`} className="px-2.5 py-1 rounded-xl bg-rose-500/20 text-[8px] font-black text-rose-200 uppercase tracking-wider">{w}</span>
+                      ))}
+                    </div>
+                  </motion.section>
+                )}
 
-              {/* ══ Supporting Signals ══ */}
-              {!behaviorLoading && behaviorMetrics && (
-                <motion.section
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-                  className="bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 rounded-[36px] p-6 shadow-sm"
-                >
-                  <p className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] mb-4 flex items-center gap-1.5">
-                    Supporting Signals <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'signals' ? null : 'signals')} className="cursor-help p-2 -m-2"><Info size={10} className="text-slate-400" /></button>
-                  </p>
-                  <AnimatePresence>
-                    {showMoneyInfo === 'signals' && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mb-3">
-                        <p className="text-[10px] text-slate-400 dark:text-premium-muted font-medium leading-relaxed">Key financial behavior signals derived from your spending patterns — volatility, subscription load, category concentration, and weekend spending bias.</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-slate-50 dark:bg-premium-dark rounded-2xl p-4 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Activity size={12} className="text-amber-500" />
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex-1">Volatility</p>
-                        <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-volatility' ? null : 'sig-volatility')} className="cursor-help p-2 -m-2"><Info size={9} className="text-slate-300" /></button>
-                      </div>
-                      <p className={`text-sm font-black ${behaviorMetrics.spend_volatility.volatility_score >= 60 ? 'text-rose-500' :
+                {/* ══ Supporting Signals ══ */}
+                {!behaviorLoading && behaviorMetrics && (
+                  <motion.section
+                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+                    className="bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 rounded-[36px] p-6 shadow-sm"
+                  >
+                    <p className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] mb-4 flex items-center gap-1.5">
+                      Supporting Signals <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'signals' ? null : 'signals')} className="cursor-help p-2 -m-2"><Info size={10} className="text-slate-400" /></button>
+                    </p>
+                    <AnimatePresence>
+                      {showMoneyInfo === 'signals' && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mb-3">
+                          <p className="text-[10px] text-slate-400 dark:text-premium-muted font-medium leading-relaxed">Key financial behavior signals derived from your spending patterns — volatility, subscription load, category concentration, and weekend spending bias.</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-slate-50 dark:bg-premium-dark rounded-2xl p-4 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Activity size={12} className="text-amber-500" />
+                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex-1">Volatility</p>
+                          <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-volatility' ? null : 'sig-volatility')} className="cursor-help p-2 -m-2"><Info size={9} className="text-slate-300" /></button>
+                        </div>
+                        <p className={`text-sm font-black ${behaviorMetrics.spend_volatility.volatility_score >= 60 ? 'text-rose-500' :
                           behaviorMetrics.spend_volatility.volatility_score >= 30 ? 'text-amber-500' : 'text-emerald-500'
-                        }`}>{behaviorMetrics.spend_volatility.classification}</p>
-                      <AnimatePresence>
-                        {showMoneyInfo === 'sig-volatility' && (
-                          <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="text-[9px] text-slate-400 font-medium leading-relaxed pt-1">How much your daily spending swings up and down. Lower is more consistent.</motion.p>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                    <div className="bg-slate-50 dark:bg-premium-dark rounded-2xl p-4 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Wallet size={12} className="text-rose-500" />
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex-1">Sub Burden</p>
-                        <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-burden' ? null : 'sig-burden')} className="cursor-help p-2 -m-2"><Info size={9} className="text-slate-300" /></button>
+                          }`}>{behaviorMetrics.spend_volatility.classification}</p>
+                        <AnimatePresence>
+                          {showMoneyInfo === 'sig-volatility' && (
+                            <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="text-[9px] text-slate-400 font-medium leading-relaxed pt-1">How much your daily spending swings up and down. Lower is more consistent.</motion.p>
+                          )}
+                        </AnimatePresence>
                       </div>
-                      <p className={`text-sm font-black ${behaviorMetrics.subscription_burden.risk_level === 'Critical' ? 'text-rose-500' :
+                      <div className="bg-slate-50 dark:bg-premium-dark rounded-2xl p-4 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Wallet size={12} className="text-rose-500" />
+                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex-1">Sub Burden</p>
+                          <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-burden' ? null : 'sig-burden')} className="cursor-help p-2 -m-2"><Info size={9} className="text-slate-300" /></button>
+                        </div>
+                        <p className={`text-sm font-black ${behaviorMetrics.subscription_burden.risk_level === 'Critical' ? 'text-rose-500' :
                           behaviorMetrics.subscription_burden.risk_level === 'Elevated' ? 'text-amber-500' : 'text-emerald-500'
-                        }`}>{behaviorMetrics.subscription_burden.risk_level}</p>
-                      <AnimatePresence>
-                        {showMoneyInfo === 'sig-burden' && (
-                          <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="text-[9px] text-slate-400 font-medium leading-relaxed pt-1">How much of your income goes to fixed subscriptions. High burden means less flexibility.</motion.p>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                    <div className="bg-slate-50 dark:bg-premium-dark rounded-2xl p-4 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <PieChart size={12} className="text-violet-500" />
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex-1">Diversity</p>
-                        <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-concentration' ? null : 'sig-concentration')} className="cursor-help p-2 -m-2"><Info size={9} className="text-slate-300" /></button>
+                          }`}>{behaviorMetrics.subscription_burden.risk_level}</p>
+                        <AnimatePresence>
+                          {showMoneyInfo === 'sig-burden' && (
+                            <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="text-[9px] text-slate-400 font-medium leading-relaxed pt-1">How much of your income goes to fixed subscriptions. High burden means less flexibility.</motion.p>
+                          )}
+                        </AnimatePresence>
                       </div>
-                      <p className="text-sm font-black text-violet-500">
-                        {Math.round(100 - behaviorMetrics.category_concentration.concentration_score * 100)}% Spread
+                      <div className="bg-slate-50 dark:bg-premium-dark rounded-2xl p-4 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <PieChart size={12} className="text-violet-500" />
+                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex-1">Diversity</p>
+                          <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-concentration' ? null : 'sig-concentration')} className="cursor-help p-2 -m-2"><Info size={9} className="text-slate-300" /></button>
+                        </div>
+                        <p className="text-sm font-black text-violet-500">
+                          {Math.round(100 - behaviorMetrics.category_concentration.concentration_score * 100)}% Spread
+                        </p>
+                        <AnimatePresence>
+                          {showMoneyInfo === 'sig-concentration' && (
+                            <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="text-[9px] text-slate-400 font-medium leading-relaxed pt-1">Whether your spending is spread across categories or concentrated in just a few. More spread = healthier.</motion.p>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                      <div className="bg-slate-50 dark:bg-premium-dark rounded-2xl p-4 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Calendar size={12} className="text-cyan-500" />
+                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex-1">Weekend</p>
+                          <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-weekend' ? null : 'sig-weekend')} className="cursor-help p-2 -m-2"><Info size={9} className="text-slate-300" /></button>
+                        </div>
+                        <p className={`text-sm font-black ${behaviorMetrics.weekend_bias.pattern === 'Leisure-skewed' ? 'text-amber-500' : 'text-emerald-500'
+                          }`}>{behaviorMetrics.weekend_bias.pattern === 'Leisure-skewed' ? 'Weekend-heavy' : behaviorMetrics.weekend_bias.pattern}</p>
+                        <AnimatePresence>
+                          {showMoneyInfo === 'sig-weekend' && (
+                            <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="text-[9px] text-slate-400 font-medium leading-relaxed pt-1">Weekends are only 2 of 7 days — fair share is ~29%. If over 40% of your money goes on weekends, it's disproportionately high.</motion.p>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  </motion.section>
+                )}
+
+                {/* ══ Maturity Trend (Money Tab — Phase 3) ══ */}
+                {!behaviorLoading && maturityHistory.length > 1 && (
+                  <motion.section
+                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+                    className="bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 rounded-[36px] p-6 shadow-sm space-y-4"
+                  >
+                    <div className="flex items-center gap-2">
+                      <TrendingUp size={14} className="text-indigo-500" />
+                      <p className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] flex items-center gap-1.5">
+                        Maturity Over Time <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'trend' ? null : 'trend')} className="cursor-help p-2 -m-2"><Info size={10} className="text-slate-400" /></button>
                       </p>
-                      <AnimatePresence>
-                        {showMoneyInfo === 'sig-concentration' && (
-                          <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="text-[9px] text-slate-400 font-medium leading-relaxed pt-1">Whether your spending is spread across categories or concentrated in just a few. More spread = healthier.</motion.p>
-                        )}
-                      </AnimatePresence>
                     </div>
-                    <div className="bg-slate-50 dark:bg-premium-dark rounded-2xl p-4 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Calendar size={12} className="text-cyan-500" />
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex-1">Weekend</p>
-                        <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sig-weekend' ? null : 'sig-weekend')} className="cursor-help p-2 -m-2"><Info size={9} className="text-slate-300" /></button>
-                      </div>
-                      <p className={`text-sm font-black ${behaviorMetrics.weekend_bias.pattern === 'Leisure-skewed' ? 'text-amber-500' : 'text-emerald-500'
-                        }`}>{behaviorMetrics.weekend_bias.pattern === 'Leisure-skewed' ? 'Weekend-heavy' : behaviorMetrics.weekend_bias.pattern}</p>
-                      <AnimatePresence>
-                        {showMoneyInfo === 'sig-weekend' && (
-                          <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="text-[9px] text-slate-400 font-medium leading-relaxed pt-1">Weekends are only 2 of 7 days — fair share is ~29%. If over 40% of your money goes on weekends, it's disproportionately high.</motion.p>
-                        )}
-                      </AnimatePresence>
+                    <AnimatePresence>
+                      {showMoneyInfo === 'trend' && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+                          <p className="text-[10px] text-slate-400 dark:text-premium-muted font-medium leading-relaxed">Historical plot of your Financial Maturity Index across periodic snapshots, showing how your financial health evolves over time.</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <div className="h-36 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <ReLineChart
+                          data={[...maturityHistory].reverse().map((h: any) => ({
+                            date: h.snapshot_at ? new Date(h.snapshot_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '',
+                            score: h.maturity_score,
+                          }))}
+                          margin={{ top: 5, right: 10, bottom: 5, left: 10 }}
+                        >
+                          <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
+                          <YAxis domain={[0, 100]} tick={{ fontSize: 8, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} width={25} />
+                          <Line type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={2} dot={{ r: 3, fill: '#6366f1', strokeWidth: 1, stroke: '#fff' }} />
+                        </ReLineChart>
+                      </ResponsiveContainer>
                     </div>
-                  </div>
-                </motion.section>
-              )}
+                  </motion.section>
+                )}
 
-              {/* ══ Maturity Trend (Money Tab — Phase 3) ══ */}
-              {!behaviorLoading && maturityHistory.length > 1 && (
-                <motion.section
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-                  className="bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 rounded-[36px] p-6 shadow-sm space-y-4"
-                >
-                  <div className="flex items-center gap-2">
-                    <TrendingUp size={14} className="text-indigo-500" />
-                    <p className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] flex items-center gap-1.5">
-                      Maturity Over Time <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'trend' ? null : 'trend')} className="cursor-help p-2 -m-2"><Info size={10} className="text-slate-400" /></button>
-                    </p>
-                  </div>
-                  <AnimatePresence>
-                    {showMoneyInfo === 'trend' && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
-                        <p className="text-[10px] text-slate-400 dark:text-premium-muted font-medium leading-relaxed">Historical plot of your Financial Maturity Index across periodic snapshots, showing how your financial health evolves over time.</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  <div className="h-36 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <ReLineChart
-                        data={[...maturityHistory].reverse().map((h: any) => ({
-                          date: h.snapshot_at ? new Date(h.snapshot_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '',
-                          score: h.maturity_score,
-                        }))}
-                        margin={{ top: 5, right: 10, bottom: 5, left: 10 }}
-                      >
-                        <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
-                        <YAxis domain={[0, 100]} tick={{ fontSize: 8, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} width={25} />
-                        <Line type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={2} dot={{ r: 3, fill: '#6366f1', strokeWidth: 1, stroke: '#fff' }} />
-                      </ReLineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </motion.section>
-              )}
-
-              {/* ══ Maturity Forecast Card (Phase 4) ══ */}
-              {maturityForecast && maturityForecast.data_points_used >= 3 ? (() => {
-                // Use real-time maturity score when available, fall back to last snapshot
-                const liveScore = behaviorMetrics?.financial_maturity?.maturity_index;
-                const score = liveScore ?? maturityForecast.current_score;
-                const projected = maturityForecast.predictions[maturityForecast.predictions.length - 1];
-                const t = maturityForecast.trajectory;
-                const headline = t === 'improving' ? 'Your score is trending upward'
-                  : t === 'declining' ? 'Your score is trending downward'
-                  : 'Your score is holding steady';
-                const takeaway = t === 'improving'
-                  ? `If you maintain your current habits, your score could rise from ${score} to ${projected}. The positive momentum is real — keep it up.`
-                  : t === 'declining'
-                  ? `At the current pace, your score could drop from ${score} to ${projected}. Consider reviewing subscriptions or reducing discretionary spend.`
-                  : score >= 60
-                  ? `Your score has been steady at ${score}. You're in a healthy range — incremental improvements in savings can push this even higher.`
-                  : `Your score has been steady at ${score}. Small changes like cutting one subscription or reducing weekend spending can move this up meaningfully.`;
-                return (
-                <motion.section
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                  className={`border rounded-[36px] p-6 shadow-sm space-y-4 ${t === 'improving'
-                      ? 'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/20'
-                      : t === 'declining'
-                        ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/20'
-                        : 'bg-white dark:bg-premium-card border-slate-100 dark:border-white/5'
-                    }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <LineChart size={14} className={
-                      t === 'improving' ? 'text-emerald-500' :
-                        t === 'declining' ? 'text-rose-500' : 'text-indigo-500'
-                    } />
-                    <span className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] flex items-center gap-1.5">
-                      Financial Health Outlook <button onClick={(e) => { e.stopPropagation(); setShowMoneyInfo(showMoneyInfo === 'forecast' ? null : 'forecast'); }} className="cursor-help p-1 -m-1"><Info size={12} className="text-slate-400" /></button>
-                    </span>
-                  </div>
-                  <AnimatePresence>
-                    {showMoneyInfo === 'forecast' && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="pt-1 pb-2">
-                        <p className="text-[10px] text-slate-400 dark:text-premium-muted font-medium leading-relaxed">Based on your recent spending patterns, we project where your Financial Maturity score is heading. This updates daily as more data comes in.</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  <div className="flex items-end gap-6">
-                    <div>
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Now</p>
-                      <p className="text-2xl font-black text-slate-900 dark:text-premium-text">{score}<span className="text-sm font-bold text-slate-400">/100</span></p>
-                    </div>
-                    <div className={`${t === 'improving' ? 'text-emerald-500' : t === 'declining' ? 'text-rose-500' : 'text-slate-400'}`}>
-                      {t === 'declining' ? <TrendingDown size={20} /> : <TrendingUp size={20} />}
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Projected</p>
-                      <p className={`text-2xl font-black ${t === 'improving' ? 'text-emerald-600 dark:text-emerald-400' :
-                          t === 'declining' ? 'text-rose-600 dark:text-rose-400' :
-                            'text-slate-900 dark:text-premium-text'
-                        }`}>{projected}<span className="text-sm font-bold text-slate-400">/100</span></p>
-                    </div>
-                  </div>
-
-                  <p className="text-[11px] font-medium text-slate-500 dark:text-premium-muted leading-relaxed">
-                    {headline} — {takeaway}
-                  </p>
-                </motion.section>
-              );})() : (
-                /* Warming-up placeholder when forecast isn't ready yet */
-                <motion.section
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                  className="border border-indigo-100 dark:border-indigo-500/15 bg-indigo-50/50 dark:bg-indigo-500/5 rounded-[36px] p-6 shadow-sm space-y-3"
-                >
-                  <div className="flex items-center gap-2">
-                    <Sparkles size={14} className="text-indigo-400" />
-                    <p className="text-[9px] font-black text-indigo-400 dark:text-indigo-300/60 uppercase tracking-[0.2em]">
-                      Financial Health Outlook
-                    </p>
-                  </div>
-                  <p className="text-sm font-bold text-slate-900 dark:text-premium-text">
-                    Building your financial trajectory...
-                  </p>
-                  <p className="text-[10px] font-medium text-slate-500 dark:text-premium-muted leading-relaxed">
-                    We're analyzing your spending patterns to project where your financial health is heading. This needs a few days of data — check back soon.
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 bg-indigo-100 dark:bg-indigo-500/10 h-1.5 rounded-full overflow-hidden">
-                      <motion.div
-                        className="h-full bg-indigo-400 dark:bg-indigo-500/60 rounded-full"
-                        initial={{ width: '0%' }}
-                        animate={{ width: maturityForecast ? `${Math.min(100, (maturityForecast.data_points_used / 3) * 100)}%` : '15%' }}
-                        transition={{ duration: 1.5, ease: 'easeOut' }}
-                      />
-                    </div>
-                    <span className="text-[9px] font-bold text-indigo-400">
-                      {maturityForecast ? `${maturityForecast.data_points_used}/3 days` : 'Collecting data'}
-                    </span>
-                  </div>
-                </motion.section>
-              )}
-
-              {/* ══ Proactive Maturity Alerts (Phase 4) ══ */}
-              {proactiveAlerts.filter(a => !a.is_dismissed && (a.alert_type.includes('maturity') || a.alert_type === 'maturity_forecast')).length > 0 && (
-                <motion.section
-                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
-                  className="space-y-2"
-                >
-                  {proactiveAlerts.filter(a => !a.is_dismissed && (a.alert_type.includes('maturity') || a.alert_type === 'maturity_forecast')).map((alert) => (
-                    <div
-                      key={alert.id}
-                      className={`p-4 rounded-2xl border ${alert.severity === 'critical' ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/20' :
-                          alert.severity === 'warning' ? 'bg-amber-50 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20' :
-                            'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/20'
+                {/* ══ Maturity Forecast Card (Phase 4) ══ */}
+                {maturityForecast && maturityForecast.data_points_used >= 3 ? (() => {
+                  // Use real-time maturity score when available, fall back to last snapshot
+                  const liveScore = behaviorMetrics?.financial_maturity?.maturity_index;
+                  const score = liveScore ?? maturityForecast.current_score;
+                  const projected = maturityForecast.predictions[maturityForecast.predictions.length - 1];
+                  const t = maturityForecast.trajectory;
+                  const headline = t === 'improving' ? 'Your score is trending upward'
+                    : t === 'declining' ? 'Your score is trending downward'
+                      : 'Your score is holding steady';
+                  const takeaway = t === 'improving'
+                    ? `If you maintain your current habits, your score could rise from ${score} to ${projected}. The positive momentum is real — keep it up.`
+                    : t === 'declining'
+                      ? `At the current pace, your score could drop from ${score} to ${projected}. Consider reviewing subscriptions or reducing discretionary spend.`
+                      : score >= 60
+                        ? `Your score has been steady at ${score}. You're in a healthy range — incremental improvements in savings can push this even higher.`
+                        : `Your score has been steady at ${score}. Small changes like cutting one subscription or reducing weekend spending can move this up meaningfully.`;
+                  return (
+                    <motion.section
+                      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                      className={`border rounded-[36px] p-6 shadow-sm space-y-4 ${t === 'improving'
+                        ? 'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/20'
+                        : t === 'declining'
+                          ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/20'
+                          : 'bg-white dark:bg-premium-card border-slate-100 dark:border-white/5'
                         }`}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className={`mt-0.5 ${alert.severity === 'critical' ? 'text-rose-500' :
-                            alert.severity === 'warning' ? 'text-amber-500' : 'text-emerald-500'
-                          }`}>
-                          {alert.severity === 'info' ? <TrendingUp size={16} /> : <AlertTriangle size={16} />}
+                      <div className="flex items-center gap-2">
+                        <LineChart size={14} className={
+                          t === 'improving' ? 'text-emerald-500' :
+                            t === 'declining' ? 'text-rose-500' : 'text-indigo-500'
+                        } />
+                        <span className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] flex items-center gap-1.5">
+                          Financial Health Outlook <button onClick={(e) => { e.stopPropagation(); setShowMoneyInfo(showMoneyInfo === 'forecast' ? null : 'forecast'); }} className="cursor-help p-1 -m-1"><Info size={12} className="text-slate-400" /></button>
+                        </span>
+                      </div>
+                      <AnimatePresence>
+                        {showMoneyInfo === 'forecast' && (
+                          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="pt-1 pb-2">
+                            <p className="text-[10px] text-slate-400 dark:text-premium-muted font-medium leading-relaxed">Based on your recent spending patterns, we project where your Financial Maturity score is heading. This updates daily as more data comes in.</p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      <div className="flex items-end gap-6">
+                        <div>
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Now</p>
+                          <p className="text-2xl font-black text-slate-900 dark:text-premium-text">{score}<span className="text-sm font-bold text-slate-400">/100</span></p>
                         </div>
-                        <div className="flex-1">
-                          <p className="text-xs font-bold text-slate-800 dark:text-premium-text">{alert.title}</p>
-                          <p className="text-[10px] font-medium text-slate-500 dark:text-premium-muted mt-0.5 leading-relaxed">{alert.message}</p>
-                          {alert.suggested_action && (
-                            <p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-1.5">→ {alert.suggested_action}</p>
-                          )}
+                        <div className={`${t === 'improving' ? 'text-emerald-500' : t === 'declining' ? 'text-rose-500' : 'text-slate-400'}`}>
+                          {t === 'declining' ? <TrendingDown size={20} /> : <TrendingUp size={20} />}
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Projected</p>
+                          <p className={`text-2xl font-black ${t === 'improving' ? 'text-emerald-600 dark:text-emerald-400' :
+                            t === 'declining' ? 'text-rose-600 dark:text-rose-400' :
+                              'text-slate-900 dark:text-premium-text'
+                            }`}>{projected}<span className="text-sm font-bold text-slate-400">/100</span></p>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </motion.section>
-              )}
 
-              {behaviorMetrics?.subscription_burden && (
-                <div className="bg-white dark:bg-premium-card p-8 rounded-[40px] border border-slate-100 dark:border-white/5 space-y-4 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-500 dark:text-premium-muted flex items-center gap-1.5">
-                      Subscription Burden <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sub-burden' ? null : 'sub-burden')} className="cursor-help p-2 -m-2"><Info size={10} className="text-slate-400" /></button>
-                    </span>
-                    <span className="text-xs font-black text-slate-900 dark:text-premium-text">
-                      {Math.round(behaviorMetrics.subscription_burden.burden_ratio * 100)}% of spend
-                    </span>
+                      <p className="text-[11px] font-medium text-slate-500 dark:text-premium-muted leading-relaxed">
+                        {headline} — {takeaway}
+                      </p>
+                    </motion.section>
+                  );
+                })() : (
+                  /* Warming-up placeholder when forecast isn't ready yet */
+                  <motion.section
+                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                    className="border border-indigo-100 dark:border-indigo-500/15 bg-indigo-50/50 dark:bg-indigo-500/5 rounded-[36px] p-6 shadow-sm space-y-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Sparkles size={14} className="text-indigo-400" />
+                      <p className="text-[9px] font-black text-indigo-400 dark:text-indigo-300/60 uppercase tracking-[0.2em]">
+                        Financial Health Outlook
+                      </p>
+                    </div>
+                    <p className="text-sm font-bold text-slate-900 dark:text-premium-text">
+                      Building your financial trajectory...
+                    </p>
+                    <p className="text-[10px] font-medium text-slate-500 dark:text-premium-muted leading-relaxed">
+                      We're analyzing your spending patterns to project where your financial health is heading. This needs a few days of data — check back soon.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 bg-indigo-100 dark:bg-indigo-500/10 h-1.5 rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full bg-indigo-400 dark:bg-indigo-500/60 rounded-full"
+                          initial={{ width: '0%' }}
+                          animate={{ width: maturityForecast ? `${Math.min(100, (maturityForecast.data_points_used / 3) * 100)}%` : '15%' }}
+                          transition={{ duration: 1.5, ease: 'easeOut' }}
+                        />
+                      </div>
+                      <span className="text-[9px] font-bold text-indigo-400">
+                        {maturityForecast ? `${maturityForecast.data_points_used}/3 days` : 'Collecting data'}
+                      </span>
+                    </div>
+                  </motion.section>
+                )}
+
+                {/* ══ Proactive Maturity Alerts (Phase 4) ══ */}
+                {proactiveAlerts.filter(a => !a.is_dismissed && (a.alert_type.includes('maturity') || a.alert_type === 'maturity_forecast')).length > 0 && (
+                  <motion.section
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+                    className="space-y-2"
+                  >
+                    {proactiveAlerts.filter(a => !a.is_dismissed && (a.alert_type.includes('maturity') || a.alert_type === 'maturity_forecast')).map((alert) => (
+                      <div
+                        key={alert.id}
+                        className={`p-4 rounded-2xl border ${alert.severity === 'critical' ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/20' :
+                          alert.severity === 'warning' ? 'bg-amber-50 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20' :
+                            'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/20'
+                          }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`mt-0.5 ${alert.severity === 'critical' ? 'text-rose-500' :
+                            alert.severity === 'warning' ? 'text-amber-500' : 'text-emerald-500'
+                            }`}>
+                            {alert.severity === 'info' ? <TrendingUp size={16} /> : <AlertTriangle size={16} />}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs font-bold text-slate-800 dark:text-premium-text">{alert.title}</p>
+                            <p className="text-[10px] font-medium text-slate-500 dark:text-premium-muted mt-0.5 leading-relaxed">{alert.message}</p>
+                            {alert.suggested_action && (
+                              <p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-1.5">→ {alert.suggested_action}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </motion.section>
+                )}
+
+                {behaviorMetrics?.subscription_burden && (
+                  <div className="bg-white dark:bg-premium-card p-8 rounded-[40px] border border-slate-100 dark:border-white/5 space-y-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-500 dark:text-premium-muted flex items-center gap-1.5">
+                        Subscription Burden <button onClick={() => setShowMoneyInfo(showMoneyInfo === 'sub-burden' ? null : 'sub-burden')} className="cursor-help p-2 -m-2"><Info size={10} className="text-slate-400" /></button>
+                      </span>
+                      <span className="text-xs font-black text-slate-900 dark:text-premium-text">
+                        {Math.round(behaviorMetrics.subscription_burden.burden_ratio * 100)}% of spend
+                      </span>
+                    </div>
+                    <AnimatePresence>
+                      {showMoneyInfo === 'sub-burden' && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+                          <p className="text-[10px] text-slate-400 dark:text-premium-muted font-medium leading-relaxed">The percentage of your total monthly spending that goes to fixed recurring subscriptions. A high ratio means most of your money is locked into commitments before you even start spending.</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <div className="w-full bg-slate-50 dark:bg-premium-dark h-2 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full transition-all duration-1000 ${behaviorMetrics.subscription_burden.risk_level === 'Critical' ? 'bg-rose-500' :
+                          behaviorMetrics.subscription_burden.risk_level === 'Elevated' ? 'bg-amber-500' : 'bg-indigo-500'
+                          }`}
+                        style={{ width: `${Math.min(100, behaviorMetrics.subscription_burden.burden_ratio * 100)}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-[10px] text-slate-400 font-medium italic">
+                      {behaviorMetrics.subscription_burden.risk_level === 'Critical'
+                        ? 'Warning: Unsafe level of fixed outflows detected for your risk profile.'
+                        : 'Commitments are currently within a manageable range for your income profile.'}
+                    </p>
                   </div>
-                  <AnimatePresence>
-                    {showMoneyInfo === 'sub-burden' && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
-                        <p className="text-[10px] text-slate-400 dark:text-premium-muted font-medium leading-relaxed">The percentage of your total monthly spending that goes to fixed recurring subscriptions. A high ratio means most of your money is locked into commitments before you even start spending.</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  <div className="w-full bg-slate-50 dark:bg-premium-dark h-2 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full transition-all duration-1000 ${
-                        behaviorMetrics.subscription_burden.risk_level === 'Critical' ? 'bg-rose-500' :
-                        behaviorMetrics.subscription_burden.risk_level === 'Elevated' ? 'bg-amber-500' : 'bg-indigo-500'
-                      }`}
-                      style={{ width: `${Math.min(100, behaviorMetrics.subscription_burden.burden_ratio * 100)}%` }}
-                    ></div>
-                  </div>
-                  <p className="text-[10px] text-slate-400 font-medium italic">
-                    {behaviorMetrics.subscription_burden.risk_level === 'Critical' 
-                      ? 'Warning: Unsafe level of fixed outflows detected for your risk profile.' 
-                      : 'Commitments are currently within a manageable range for your income profile.'}
-                  </p>
-                </div>
-              )}
-            </div>
-          )})()}
+                )}
+              </div>
+            )
+          })()}
 
           {activeBucket === 'commitment' && (() => {
             const totalEmi = emis.reduce((sum, e) => sum + e.monthlyAmount, 0);
@@ -745,6 +746,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                   <div className="space-y-3">
                     <p className="text-[9px] font-black text-slate-400 dark:text-premium-muted uppercase tracking-[0.2em] px-1">Recurring Subscriptions</p>
                     {activeSubs.map((sub, i) => {
+                      const monthlyAmount = sub.billingCycle === 'yearly' ? Math.round(sub.amount / 12) : sub.amount;
                       return (
                         <motion.div
                           key={sub.id}
@@ -764,8 +766,8 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-black text-slate-900 dark:text-premium-text text-sm">₹{sub.amount.toLocaleString()}</p>
-                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">/{sub.billingCycle === 'yearly' ? 'yr' : 'mo'}</p>
+                            <p className="font-black text-slate-900 dark:text-premium-text text-sm">₹{monthlyAmount.toLocaleString()}</p>
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">/mo</p>
                           </div>
                         </motion.div>
                       );
@@ -790,7 +792,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
               {!behaviorLoading && !behaviorMetrics && (
                 <div className="bg-white dark:bg-premium-card p-8 rounded-[40px] border border-slate-100 dark:border-white/5 text-center space-y-3">
                   <BrainCircuit size={28} className="text-slate-300 dark:text-premium-muted/30 mx-auto" />
-                  <p className="text-xs font-bold text-slate-400 dark:text-premium-muted">No behavioral data available yet. Add expenses and subscriptions to unlock intelligence.</p>
+                  <p className="text-xs font-bold text-slate-400 dark:text-premium-muted">Your financial profile is still developing — additional activity will unlock deeper insights.</p>
                 </div>
               )}
 
@@ -810,13 +812,13 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                       <div
                         key={alert.id}
                         className={`p-4 rounded-2xl border ${alert.severity === 'critical' ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/20' :
-                            alert.severity === 'warning' ? 'bg-amber-50 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20' :
-                              'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/20'
+                          alert.severity === 'warning' ? 'bg-amber-50 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20' :
+                            'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/20'
                           }`}
                       >
                         <div className="flex items-start gap-3">
                           <div className={`mt-0.5 ${alert.severity === 'critical' ? 'text-rose-500' :
-                              alert.severity === 'warning' ? 'text-amber-500' : 'text-emerald-500'
+                            alert.severity === 'warning' ? 'text-amber-500' : 'text-emerald-500'
                             }`}>
                             {alert.severity === 'critical' ? <ShieldAlert size={16} /> : <AlertTriangle size={16} />}
                           </div>
@@ -862,7 +864,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                     <AnimatePresence>
                       {showBehaviorInfo === 'persona' && (
                         <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="pt-2 pb-1">
-                          <p className="text-[10px] text-slate-400 dark:text-premium-muted font-medium leading-relaxed">Your overarching financial personality model evaluated across multi-dimensional spending factors and psychological triggers deduced from the past 90 days.</p>
+                          <p className="text-[10px] text-slate-400 dark:text-premium-muted font-medium leading-relaxed">Confidence increases as more behavioral data is observed.</p>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -1099,7 +1101,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className={`text-[10px] font-black uppercase tracking-widest ${behaviorMetrics.spend_volatility.volatility_score >= 60 ? 'text-rose-500' :
-                          behaviorMetrics.spend_volatility.volatility_score >= 30 ? 'text-amber-500' : 'text-emerald-500'
+                        behaviorMetrics.spend_volatility.volatility_score >= 30 ? 'text-amber-500' : 'text-emerald-500'
                         }`}>{behaviorMetrics.spend_volatility.classification}</span>
                       {expandedBehavior === 'volatility' ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
                     </div>
@@ -1205,7 +1207,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className={`text-[10px] font-black uppercase tracking-widest ${behaviorMetrics.subscription_burden.risk_level === 'Critical' ? 'text-rose-500' :
-                          behaviorMetrics.subscription_burden.risk_level === 'Elevated' ? 'text-amber-500' : 'text-emerald-500'
+                        behaviorMetrics.subscription_burden.risk_level === 'Elevated' ? 'text-amber-500' : 'text-emerald-500'
                         }`}>{behaviorMetrics.subscription_burden.risk_level}</span>
                       {expandedBehavior === 'burden' ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
                     </div>
@@ -1238,7 +1240,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                           <div className="w-full bg-slate-100 dark:bg-premium-dark h-3 rounded-full overflow-hidden">
                             <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(100, behaviorMetrics.subscription_burden.burden_ratio * 100)}%` }} transition={{ duration: 0.8 }}
                               className={`h-full rounded-full ${behaviorMetrics.subscription_burden.burden_ratio > 0.5 ? 'bg-rose-500' :
-                                  behaviorMetrics.subscription_burden.burden_ratio > 0.35 ? 'bg-amber-500' : 'bg-emerald-500'
+                                behaviorMetrics.subscription_burden.burden_ratio > 0.35 ? 'bg-amber-500' : 'bg-emerald-500'
                                 }`} />
                           </div>
                         </div>
@@ -1257,7 +1259,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className={`text-[10px] font-black uppercase tracking-widest ${behaviorMetrics.recurring_creep.new_subscriptions_60d > 2 ? 'text-rose-500' :
-                          behaviorMetrics.recurring_creep.new_subscriptions_60d > 0 ? 'text-amber-500' : 'text-emerald-500'
+                        behaviorMetrics.recurring_creep.new_subscriptions_60d > 0 ? 'text-amber-500' : 'text-emerald-500'
                         }`}>
                         {behaviorMetrics.recurring_creep.new_subscriptions_60d > 0
                           ? `+${behaviorMetrics.recurring_creep.new_subscriptions_60d} new`
@@ -1481,10 +1483,10 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                               ? (entry.y >= avgY ? '#10b981' : '#3b82f6')
                               : (entry.y >= avgY ? '#f59e0b' : '#f43f5e');
                             return (
-                            <div key={entry.name} className="flex items-center gap-1.5">
-                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-                              <span className="text-[8px] font-bold text-slate-500 dark:text-premium-muted">{entry.name}</span>
-                            </div>
+                              <div key={entry.name} className="flex items-center gap-1.5">
+                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+                                <span className="text-[8px] font-bold text-slate-500 dark:text-premium-muted">{entry.name}</span>
+                              </div>
                             );
                           })}
                         </div>
@@ -1522,8 +1524,8 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                       transition={{ delay: idx * 0.05 }}
                       onClick={() => toggleAction(idx)}
                       className={`w-full flex items-center gap-4 p-5 rounded-[28px] border transition-all active:scale-[0.98] text-left ${selectedActions.has(idx)
-                          ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30'
-                          : 'bg-white dark:bg-premium-card border-slate-100 dark:border-white/5'
+                        ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30'
+                        : 'bg-white dark:bg-premium-card border-slate-100 dark:border-white/5'
                         }`}
                     >
                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${selectedActions.has(idx) ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-premium-dark'
@@ -1567,8 +1569,8 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                     )}
                     {actionResults.map((r, i) => (
                       <div key={i} className={`flex items-center gap-3 p-4 rounded-[24px] border ${r.status === 'success'
-                          ? 'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-100 dark:border-emerald-500/10'
-                          : 'bg-rose-50 dark:bg-rose-500/5 border-rose-100 dark:border-rose-500/10'
+                        ? 'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-100 dark:border-emerald-500/10'
+                        : 'bg-rose-50 dark:bg-rose-500/5 border-rose-100 dark:border-rose-500/10'
                         }`}>
                         {r.status === 'success'
                           ? <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
@@ -1587,7 +1589,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
               {/* Past Executed Actions History */}
               {pastActions.length > 0 && (
                 <div className="pt-2">
-                  <button 
+                  <button
                     onClick={() => setShowPastActions(!showPastActions)}
                     className="w-full flex items-center justify-between p-4 bg-slate-100 dark:bg-premium-card rounded-2xl active:scale-[0.975] transition-transform duration-150 ease-out text-slate-600 dark:text-premium-muted hover:text-slate-900 border border-transparent dark:border-white/5"
                   >
@@ -1596,12 +1598,12 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                     </span>
                     <ChevronRight size={16} className={`transition-transform duration-300 ${showPastActions ? 'rotate-90' : ''}`} />
                   </button>
-                  
+
                   <AnimatePresence>
                     {showPastActions && (
-                      <motion.div 
-                        initial={{ height: 0, opacity: 0 }} 
-                        animate={{ height: 'auto', opacity: 1 }} 
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden mt-2"
                       >
@@ -1660,8 +1662,8 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div className={`max-w-[85%] p-4 rounded-2xl ${msg.role === 'user'
-                      ? 'bg-indigo-600 text-white rounded-br-md'
-                      : 'bg-white dark:bg-premium-dark/50 border border-slate-100 dark:border-white/5 text-slate-700 dark:text-premium-muted rounded-bl-md'
+                    ? 'bg-indigo-600 text-white rounded-br-md'
+                    : 'bg-white dark:bg-premium-dark/50 border border-slate-100 dark:border-white/5 text-slate-700 dark:text-premium-muted rounded-bl-md'
                     }`}>
                     <p className="text-[11px] font-medium leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   </div>
@@ -1703,7 +1705,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
           <Sparkles className="text-indigo-400 mb-6" size={28} />
           <h3 className="text-2xl font-black mb-3 tracking-tight">Privacy First Architecture</h3>
           <p className="text-[11px] text-zinc-400 dark:text-premium-muted leading-relaxed font-medium">
-            SpndWisee processes your financial data with end-to-end encryption. Your capital flows, account numbers, and spending patterns are never shared with third parties. We believe data privacy is the ultimate wealth.
+            XpendWise processes your financial data with end-to-end encryption. Your capital flows, account numbers, and spending patterns are never shared with third parties. We believe data privacy is the ultimate wealth.
           </p>
         </div>
       )}

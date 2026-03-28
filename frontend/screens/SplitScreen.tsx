@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { useApp } from '../store';
 import { 
   Plus, Users, ArrowUpRight, ArrowDownLeft, 
-  ChevronRight, Search, Zap, HandCoins, UserPlus
+  ChevronRight, Search, Zap, HandCoins, UserPlus, Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -143,11 +143,16 @@ const SplitScreen: React.FC = () => {
       </AnimatePresence>
 
       {/* Quick Action Info */}
-      <div className="bg-indigo-50 dark:bg-indigo-500/5 p-6 rounded-[36px] flex items-start gap-4 border border-indigo-100 dark:border-indigo-500/10 shadow-sm">
-        <Zap className="text-indigo-600 shrink-0 mt-1" size={18} />
-        <p className="text-[11px] font-medium text-indigo-900/60 dark:text-indigo-100/60 leading-relaxed">
-          Capital sharing intelligence is enabled. We automatically calculate cross-friend settlements to minimize transaction steps.
-        </p>
+      <div className="bg-slate-100 dark:bg-premium-card p-6 rounded-[36px] flex items-start gap-4 border border-slate-200 dark:border-white/5 shadow-sm">
+        <Info className="text-slate-400 shrink-0 mt-1" size={18} />
+        <div>
+          <p className="text-[11px] font-bold text-slate-600 dark:text-premium-muted leading-relaxed">
+            Shared expense tracking is currently in preview.
+          </p>
+          <p className="text-[10px] font-medium text-slate-500 dark:text-premium-muted/60 mt-1">
+            This view illustrates how group balances and settlements work.
+          </p>
+        </div>
       </div>
 
     </div>

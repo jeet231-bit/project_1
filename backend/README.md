@@ -1,6 +1,6 @@
-# spndwisee Backend
+# XpendWise Backend
 
-This directory contains the FastAPI backend for the spndwisee application.
+This directory contains the FastAPI backend for the XpendWise application.
 
 ## Setup
 

@@ -23,7 +23,7 @@ const LandingScreen: React.FC<LandingScreenProps> = ({ onGetStarted, onLogin }) 
         >
           <h1 className="text-5xl font-extrabold tracking-tight">
             <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
-              Spndwisee
+              XpendWise
             </span>
           </h1>
           <p className="mt-3 text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">

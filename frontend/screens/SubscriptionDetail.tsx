@@ -179,7 +179,10 @@ const SubscriptionDetail: React.FC<Props> = ({ subId, onBack }) => {
             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Behavioral Insight</span>
           </div>
           <p className="text-xs text-amber-900 dark:text-amber-200 leading-relaxed font-medium">
-            Last activity was <span className="underline decoration-amber-400">2024-05-19</span>. Your current usage score is <span className="font-bold">92%</span>. Service value is high.
+            This insight will become more personalized as we learn from your usage patterns and activity.
+          </p>
+          <p className="text-[10px] text-amber-900/60 dark:text-amber-200/60 font-medium">
+            Additional activity improves accuracy.
           </p>
         </div>
 

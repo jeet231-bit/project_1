@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ForgotPasswordScreen from './ForgotPasswordScreen';
 
 interface LoginScreenProps {
-  onBack?: () => void;
-  defaultMode?: 'login' | 'signup';
+    onBack?: () => void;
+    defaultMode?: 'login' | 'signup';
 }
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ onBack, defaultMode = 'login' }) => {
@@ -80,7 +80,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onBack, defaultMode = 'login'
 
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                        Spndwisee
+                        XpendWise
                     </h1>
                     <p className="text-slate-400 mt-2 text-sm">
                         {isLogin ? 'Welcome back to your Capital Engine' : 'Initialize your Capital Discipline Engine'}

@@ -1,4 +1,4 @@
-# Spndwisee — AI-Driven Financial Capital Discipline Engine
+# XpendWise — AI-Driven Financial Capital Discipline Engine
 
 A modern, premium fintech app combining a **FastAPI backend** and a **React/TypeScript frontend**. Features AI-powered financial intelligence (Lex), proactive alerts, subscription management, and a support chatbot.
 
@@ -113,4 +113,4 @@ VITE_API_URL=http://127.0.0.1:8000
 
 ---
 
-© 2026 Spndwisee. All rights reserved.
+© 2026 XpendWise. All rights reserved.

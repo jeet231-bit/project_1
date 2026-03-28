@@ -448,7 +448,7 @@ def _build_system_prompt(context: Dict[str, Any]) -> str:
 
     # ── Base system prompt (always present) ───────────────────────────
     base = """\
-You are **Lex**, an AI Capital Discipline Strategist embedded inside the Spndwisee app.
+You are **Lex**, an AI Capital Discipline Strategist embedded inside the XpendWise app.
 You are NOT a chatbot. You are a financial strategist. Every response must demonstrate
 strategic reasoning, not generic advice.
 
@@ -655,7 +655,7 @@ Always include every field even if the value is null or [].
         base += "\n\n--- CAPITAL DISCIPLINE ENGINE (Active) ---\n\n"
         base += (
             "The system has computed the user's capital discipline metrics. "
-            "This is the CORE of Spndwisee's positioning as an AI Capital Discipline Engine. "
+            "This is the CORE of XpendWise's positioning as an AI Capital Discipline Engine. "
             "When discussing finances, savings potential, investments, or trajectory, "
             "you MUST reference these numbers.\n\n"
         )

@@ -1,9 +1,9 @@
-# Spndwisee Comprehensive Project Snapshot
+# XpendWise Comprehensive Project Snapshot
 
 ## 1. Executive Summary
 
 ### 1.1 What This Repository Is
-Spndwisee is a personal-finance application built as a split-stack product:
+XpendWise is a personal-finance application built as a split-stack product:
 - A FastAPI backend under `backend/` for authenticated APIs, financial analysis, Lex intelligence, export flows, and persistence.
 - A React + TypeScript frontend under `frontend/` for the mobile-style product UI, dashboard, chatbot, Lex entry points, split and EMI screens, and Supabase-authenticated app state.
 
@@ -334,7 +334,7 @@ This means the repository already includes both backend verification and screens
 
 ## 12. Practical Summary
 
-Spndwisee is currently best understood as a premium finance app with:
+XpendWise is currently best understood as a premium finance app with:
 - real authenticated CRUD for core money objects
 - a substantial deterministic financial intelligence layer
 - OpenAI-backed Lex orchestration with conversation persistence

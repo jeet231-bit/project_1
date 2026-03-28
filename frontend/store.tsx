@@ -114,6 +114,13 @@ const mapBudget = (raw: any): CategoryBudget => ({
   createdAt: raw.created_at || '',
 });
 
+const mapEmi = (raw: any): EMI => ({
+  id: String(raw.id),
+  name: raw.name || '',
+  monthlyAmount: raw.amount || 0,
+  dueDate: raw.due_date || new Date().toISOString().split('T')[0],
+});
+
 const MOCK_FRIENDS: Friend[] = [
   { id: 'f1', name: 'Varun', balance: 1250 },
   { id: 'f2', name: 'Rohan', balance: -450 },
@@ -136,10 +143,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [goals, setGoals] = useState<Goal[]>([
     { id: 'g1', type: GoalType.SAVINGS, targetAmount: 50000, period: 'monthly', currentProgress: 0 },
   ]);
-  const [emis, setEmis] = useState<EMI[]>([
-    { id: 'emi1', name: 'Car Loan', monthlyAmount: 11000, dueDate: '2026-04-05' },
-    { id: 'emi2', name: 'Phone EMI', monthlyAmount: 3400, dueDate: '2026-04-10' },
-  ]);
+  const [emis, setEmis] = useState<EMI[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [budgets, setBudgets] = useState<CategoryBudget[]>([]);
   const [friends, setFriends] = useState<Friend[]>(MOCK_FRIENDS);
@@ -165,11 +169,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
 
         // Fetch all real data in parallel (allSettled so one failure doesn't block others)
-        const [subsRes, expRes, bankRes, budgetRes] = await Promise.allSettled([
+        const [subsRes, expRes, bankRes, budgetRes, emiRes] = await Promise.allSettled([
           api.get('/subscriptions'),
           api.get('/expenses'),
           api.get('/bank-accounts'),
           api.get('/budgets'),
+          api.get('/commitments'),
         ]);
 
         // Map backend data → frontend types (log failures explicitly)
@@ -228,6 +233,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           console.log('DEBUG: Loaded', budgetRes.value.length, 'budgets');
         } else if (budgetRes.status === 'rejected') {
           console.error('DEBUG: Failed to fetch budgets:', budgetRes.reason);
+        }
+
+        if (emiRes.status === 'fulfilled' && Array.isArray(emiRes.value)) {
+          setEmis(emiRes.value.map(mapEmi));
+          console.log('DEBUG: Loaded', emiRes.value.length, 'EMIs/Commitments');
+        } else if (emiRes.status === 'rejected') {
+          console.error('DEBUG: Failed to fetch EMIs:', emiRes.reason);
         }
 
         setDataLoaded(true);

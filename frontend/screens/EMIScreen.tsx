@@ -50,6 +50,12 @@ const EMIScreen: React.FC<EMIScreenProps> = ({ onBack }) => {
         </button>
       </header>
 
+      {/* Contextual Transparency Banner */}
+      <div className="bg-slate-100 dark:bg-zinc-900/50 p-4 rounded-[20px] flex items-start gap-3 border border-slate-200 dark:border-zinc-800 shadow-sm">
+        <Info size={14} className="text-slate-400 mt-0.5 shrink-0" />
+        <p className="text-[10px] text-slate-500 font-medium leading-relaxed">EMIs are currently tracked locally and will be incorporated into your financial insights.</p>
+      </div>
+
       {/* Summary Card */}
       <div className="bg-zinc-950 dark:bg-zinc-900 p-8 rounded-[40px] text-white shadow-2xl shadow-zinc-200 dark:shadow-none relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-10"><ShieldCheck size={120} /></div>

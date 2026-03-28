@@ -161,7 +161,7 @@ const Settings: React.FC = () => {
         <div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-50 tracking-tight">{userName}</h1>
           {userEmail && <p className="text-xs text-slate-400 font-medium mt-0.5">{userEmail}</p>}
-          <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Premium Member</p>
+          <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Early Access User</p>
         </div>
       </div>
 
@@ -172,7 +172,10 @@ const Settings: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="bg-slate-50 dark:bg-zinc-800 p-2.5 rounded-2xl text-slate-600"><Bell size={18} /></div>
-                <span className="text-sm font-bold text-slate-800 dark:text-zinc-200">Payment Alerts</span>
+                <div>
+                  <span className="text-sm font-bold text-slate-800 dark:text-zinc-200">Payment Alerts</span>
+                  <p className="text-[10px] font-medium text-slate-500 mt-1">This control will activate as the feature is integrated.</p>
+                </div>
               </div>
               <Toggle active={notifs} onToggle={() => setNotifs(!notifs)} />
             </div>
@@ -181,7 +184,7 @@ const Settings: React.FC = () => {
                 <div className="bg-slate-50 dark:bg-zinc-800 p-2.5 rounded-2xl text-slate-600"><Smartphone size={18} /></div>
                 <div>
                   <span className="text-sm font-bold text-slate-800 dark:text-zinc-200">SMS Scanner</span>
-                  <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-tighter">Coming Soon</p>
+                  <p className="text-[10px] font-medium text-slate-500 leading-tight mt-1">Automated expense detection via SMS is being integrated.</p>
                 </div>
               </div>
               <Toggle active={false} onToggle={() => { }} />
@@ -195,7 +198,10 @@ const Settings: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="bg-slate-50 dark:bg-zinc-800 p-2.5 rounded-2xl text-slate-600"><Coins size={18} /></div>
-                <span className="text-sm font-bold text-slate-800 dark:text-zinc-200">Base Currency</span>
+                <div>
+                  <span className="text-sm font-bold text-slate-800 dark:text-zinc-200">Base Currency</span>
+                  <p className="text-[10px] font-medium text-slate-500 mt-1">Multi-currency support is being integrated.</p>
+                </div>
               </div>
               <span className="text-xs font-black text-indigo-600 dark:text-indigo-400">INR (₹)</span>
             </div>
@@ -210,7 +216,7 @@ const Settings: React.FC = () => {
                   <div className="bg-slate-50 dark:bg-zinc-800 p-2.5 rounded-2xl text-slate-600 group-hover:text-indigo-500 group-active:text-indigo-500 transition-colors"><Database size={18} /></div>
                   <div className="text-left">
                     <span className="text-sm font-bold text-slate-800 dark:text-zinc-200">Export Vault</span>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">5 data features</p>
+                    <p className="text-[10px] font-medium text-slate-400 mt-0.5">Report format will evolve with more detailed financial insights.</p>
                   </div>
                 </div>
                 {vaultOpen
@@ -391,7 +397,7 @@ const Settings: React.FC = () => {
                                       <div className="bg-white dark:bg-zinc-900 p-3 rounded-xl text-center">
                                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Volatility</p>
                                         <p className={`text-sm font-black ${(behaviorData.metrics.spend_volatility?.volatility_score || 0) >= 60 ? 'text-rose-500' :
-                                            (behaviorData.metrics.spend_volatility?.volatility_score || 0) >= 30 ? 'text-amber-500' : 'text-emerald-500'
+                                          (behaviorData.metrics.spend_volatility?.volatility_score || 0) >= 30 ? 'text-amber-500' : 'text-emerald-500'
                                           }`}>
                                           {behaviorData.metrics.spend_volatility?.volatility_score || 0}
                                         </p>
@@ -399,7 +405,7 @@ const Settings: React.FC = () => {
                                       <div className="bg-white dark:bg-zinc-900 p-3 rounded-xl text-center">
                                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Burden</p>
                                         <p className={`text-sm font-black ${behaviorData.metrics.subscription_burden?.risk_level === 'Critical' ? 'text-rose-500' :
-                                            behaviorData.metrics.subscription_burden?.risk_level === 'Elevated' ? 'text-amber-500' : 'text-emerald-500'
+                                          behaviorData.metrics.subscription_burden?.risk_level === 'Elevated' ? 'text-amber-500' : 'text-emerald-500'
                                           }`}>
                                           {behaviorData.metrics.subscription_burden?.risk_level || 'N/A'}
                                         </p>
@@ -456,7 +462,7 @@ const Settings: React.FC = () => {
           <Shield size={12} />
           <span className="text-[10px] font-black uppercase tracking-widest">End-to-End Encrypted Storage</span>
         </div>
-        <p className="text-[9px] font-bold">SpndWisee v1.0.0 • Silicon Architecture</p>
+        <p className="text-[9px] font-bold">XpendWise v1.0.0 • Silicon Architecture</p>
       </div>
     </div>
   );

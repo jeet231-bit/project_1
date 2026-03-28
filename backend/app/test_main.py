@@ -7,7 +7,7 @@ client = TestClient(app)
 def test_read_root():
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"message": "Welcome to the spndwisee API"}
+    assert response.json() == {"message": "Welcome to the XpendWise API"}
 
 def test_create_subscription():
     response = client.post("/subscriptions/", json={

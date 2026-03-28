@@ -129,7 +129,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       try {
         // Ensure a maturity snapshot exists (needed for alerts & forecast)
         // This is throttled server-side to 1 per 23h, so safe to call every mount
-        await api.post('/insights/maturity-snapshot', {}).catch(() => {});
+        await api.post('/insights/maturity-snapshot', {}).catch(() => { });
 
         // Trigger alert detection (compares snapshots, generates new alerts)
         const checkResult = await api.post('/insights/alerts/check', {});
@@ -253,13 +253,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       balance: parseFloat(newBank.balance),
       lastFour: newBank.lastFour,
     };
-    
+
     if (editingBankId) {
-       setBankAccounts(bankAccounts.map(b => b.id === editingBankId ? newAcc : b));
+      setBankAccounts(bankAccounts.map(b => b.id === editingBankId ? newAcc : b));
     } else {
-       setBankAccounts([...bankAccounts, newAcc]);
+      setBankAccounts([...bankAccounts, newAcc]);
     }
-    
+
     try {
       if (!editingBankId) {
         await api.post('/bank-accounts', {
@@ -320,7 +320,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <div className="flex gap-2">
           <button
             onClick={toggleSecureMode}
-            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-slate-500 dark:text-premium-muted active:scale-[0.85] transition-transform duration-150 ease-out hover:border-indigo-200 dark:hover:border-indigo-500/30 group"
+            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-slate-500 dark:text-premium-muted active:opacity-70 transition-colors hover:border-indigo-200 dark:hover:border-indigo-500/30 group"
           >
             {isSecureMode
               ? <EyeOff size={16} className="group-hover:text-indigo-500 transition-colors" />
@@ -329,7 +329,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </button>
           <button
             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-slate-500 dark:text-premium-muted active:scale-[0.85] transition-transform duration-150 ease-out hover:border-amber-200 dark:hover:border-amber-500/30 group"
+            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-slate-500 dark:text-premium-muted active:opacity-70 transition-colors hover:border-amber-200 dark:hover:border-amber-500/30 group"
           >
             {theme === 'light'
               ? <Moon size={16} className="group-hover:text-amber-500 transition-colors" />
@@ -338,13 +338,19 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </button>
           <button
             onClick={() => signOutExplicitly()}
-            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-rose-400 active:scale-[0.85] transition-transform duration-150 ease-out hover:border-rose-200 dark:hover:border-rose-500/30 hover:text-rose-500 group"
+            className="w-10 h-10 rounded-2xl bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 flex items-center justify-center shadow-sm hover:shadow-md text-rose-400 active:opacity-70 transition-colors hover:border-rose-200 dark:hover:border-rose-500/30 hover:text-rose-500 group"
             title="Sign Out"
           >
             <Power size={16} />
           </button>
         </div>
       </header>
+
+      {/* Global Contextual Banner */}
+      <div className="bg-slate-100/80 dark:bg-zinc-900/50 p-4 rounded-2xl flex items-start gap-3 border border-slate-200 dark:border-zinc-800 shadow-sm mt-2 mb-6">
+        <Sparkles size={14} className="text-slate-400 mt-0.5 shrink-0" />
+        <p className="text-[10px] text-slate-500 font-medium leading-relaxed">Your insights become more precise as we learn from your financial patterns.</p>
+      </div>
 
       {/* Proactive Intelligence Section (Phase 4) */}
       <section className="space-y-3">
@@ -394,8 +400,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                       <div className="flex items-start gap-4">
                         <div className={`mt-0.5 ${sc.icon}`}>
                           {alert.severity === 'critical' ? <ShieldAlert size={20} /> :
-                           alert.severity === 'warning' ? <AlertTriangle size={20} /> :
-                           <TrendingUp size={20} />}
+                            alert.severity === 'warning' ? <AlertTriangle size={20} /> :
+                              <TrendingUp size={20} />}
                         </div>
                         <div className="flex-1 space-y-2 text-left">
                           <div className="flex items-center gap-2 justify-start">
@@ -435,49 +441,48 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           const t = maturityForecast.trajectory;
           const headline = t === 'improving' ? 'Your financial health is improving'
             : t === 'declining' ? 'Your financial health needs attention'
-            : 'Your financial health is holding steady';
+              : 'Your financial health is holding steady';
           const detail = t === 'improving'
             ? `Score is trending up from ${score} toward ${projected}. Keep it going.`
             : t === 'declining'
-            ? `Score may drop from ${score} to ${projected} if current habits continue.`
-            : score >= 60 ? `Score is steady at ${score}. You're in a good place.`
-            : `Score is steady at ${score}. Small habit changes can push this higher.`;
+              ? `Score may drop from ${score} to ${projected} if current habits continue.`
+              : score >= 60 ? `Score is steady at ${score}. You're in a good place.`
+                : `Score is steady at ${score}. Small habit changes can push this higher.`;
           return (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`p-5 rounded-[28px] border ${
-              t === 'improving'
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`p-5 rounded-[28px] border ${t === 'improving'
                 ? 'bg-emerald-50 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/20'
                 : t === 'declining'
-                ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/20'
-                : 'bg-slate-50 dark:bg-slate-500/5 border-slate-200 dark:border-white/10'
-            }`}
-          >
-            <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-2xl ${
-                t === 'improving'
+                  ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/20'
+                  : 'bg-slate-50 dark:bg-slate-500/5 border-slate-200 dark:border-white/10'
+                }`}
+            >
+              <div className="flex items-center gap-4">
+                <div className={`p-3 rounded-2xl ${t === 'improving'
                   ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600'
                   : t === 'declining'
-                  ? 'bg-rose-100 dark:bg-rose-500/10 text-rose-600'
-                  : 'bg-slate-100 dark:bg-slate-500/10 text-slate-600'
-              }`}>
-                {t === 'declining' ? <TrendingDown size={20} /> : <TrendingUp size={20} />}
+                    ? 'bg-rose-100 dark:bg-rose-500/10 text-rose-600'
+                    : 'bg-slate-100 dark:bg-slate-500/10 text-slate-600'
+                  }`}>
+                  {t === 'declining' ? <TrendingDown size={20} /> : <TrendingUp size={20} />}
+                </div>
+                <div className="flex-1">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-premium-muted mb-0.5">
+                    Financial Health Outlook
+                  </p>
+                  <p className="text-sm font-bold text-slate-900 dark:text-premium-text">
+                    {headline}
+                  </p>
+                  <p className="text-[10px] font-medium text-slate-500 dark:text-premium-muted mt-0.5">
+                    {detail}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-premium-muted mb-0.5">
-                  Financial Health Outlook
-                </p>
-                <p className="text-sm font-bold text-slate-900 dark:text-premium-text">
-                  {headline}
-                </p>
-                <p className="text-[10px] font-medium text-slate-500 dark:text-premium-muted mt-0.5">
-                  {detail}
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        );})() : (
+            </motion.div>
+          );
+        })() : (
           /* Warming-up placeholder when no forecast data yet */
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -496,7 +501,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                   Building your financial trajectory...
                 </p>
                 <p className="text-[10px] font-medium text-slate-500 dark:text-premium-muted mt-0.5">
-                  Spndwisee learns your patterns over time. Personalized alerts and health forecasts will appear within 1–2 days of usage.
+                  XpendWise learns your patterns over time. Personalized alerts and health forecasts will appear within 1–2 days of usage.
                 </p>
               </div>
             </div>
@@ -581,9 +586,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <AnimatePresence>
           {showExplainer === 'liquidity' && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="bg-indigo-50/50 dark:bg-indigo-500/5 p-4 rounded-2xl mb-4">
-               <p className="text-[10px] font-medium text-indigo-900/60 dark:text-indigo-300/60 leading-relaxed">
+              <p className="text-[10px] font-medium text-indigo-900/60 dark:text-indigo-300/60 leading-relaxed">
                 This shows the total cash you have right now across all your bank accounts and cards. It helps you see how much money is available to cover your bills and expenses.
-               </p>
+              </p>
               <button onClick={() => setShowExplainer(null)} className="text-[9px] font-bold text-indigo-600 mt-2 uppercase tracking-widest">Dismiss</button>
             </motion.div>
           )}
@@ -591,7 +596,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 px-1">
           {/* Cash Wallet card */}
-          <div className={`min-w-[170px] bg-white dark:bg-premium-card border ${isEditingAccounts ? 'border-dashed border-indigo-300 dark:border-indigo-500/50 outline outline-4 outline-indigo-50 dark:outline-indigo-500/10' : 'border-slate-100 dark:border-white/5'} p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 transition-colors shrink-0`}>
+          <div className={`min-w-[170px] bg-white dark:bg-premium-card border ${isEditingAccounts ? 'border-dashed border-indigo-300 dark:border-indigo-500/50 outline outline-4 outline-indigo-50 dark:outline-indigo-500/10' : 'border-slate-100 dark:border-white/5 cursor-pointer hover:border-indigo-100 dark:hover:border-indigo-900 active:border-indigo-100 dark:active:border-indigo-900'} p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 transition-colors shrink-0 group`}>
             <div className="flex justify-between items-start">
               <div className="w-9 h-9 rounded-2xl flex items-center justify-center text-xs bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">
                 <Wallet size={16} />
@@ -622,11 +627,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               return true;
             });
           })().map((acc, i) => (
-            <div key={acc.id} onClick={() => { if(isEditingAccounts) { setEditingBankId(acc.id); setNewBank({bankName: acc.bankName, accountType: acc.accountType, balance: String(acc.balance), lastFour: acc.lastFour}); setShowAddBank(true); } }} className={`min-w-[170px] bg-white dark:bg-premium-card border ${isEditingAccounts ? 'border-dashed border-indigo-300 dark:border-indigo-500/50 outline outline-4 outline-indigo-50 dark:outline-indigo-500/10 cursor-pointer active:scale-[0.985] transition-transform' : 'border-slate-100 dark:border-white/5'} p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 transition-colors shrink-0 relative overflow-hidden group`}>
+            <div key={acc.id} onClick={() => { if (isEditingAccounts) { setEditingBankId(acc.id); setNewBank({ bankName: acc.bankName, accountType: acc.accountType, balance: String(acc.balance), lastFour: acc.lastFour }); setShowAddBank(true); } }} className={`min-w-[170px] bg-white dark:bg-premium-card border ${isEditingAccounts ? 'border-dashed border-indigo-300 dark:border-indigo-500/50 outline outline-4 outline-indigo-50 dark:outline-indigo-500/10 cursor-pointer active:scale-[0.985] transition-transform' : 'border-slate-100 dark:border-white/5 cursor-pointer hover:border-indigo-100 dark:hover:border-indigo-900 active:border-indigo-100 dark:active:border-indigo-900'} p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 transition-colors shrink-0 relative overflow-hidden group`}>
               {isEditingAccounts && (
-                 <button onClick={(e) => { e.stopPropagation(); setBankAccounts(bankAccounts.filter(b => b.id !== acc.id)); }} className="absolute top-0 right-0 p-3 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white rounded-bl-3xl transition-colors">
-                    <X size={12} strokeWidth={3} />
-                 </button>
+                <button onClick={(e) => { e.stopPropagation(); setBankAccounts(bankAccounts.filter(b => b.id !== acc.id)); }} className="absolute top-0 right-0 p-3 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white rounded-bl-3xl transition-colors">
+                  <X size={12} strokeWidth={3} />
+                </button>
               )}
               <div className="flex justify-between items-start">
                 <div className={`w-9 h-9 rounded-2xl flex items-center justify-center text-xs ${acc.accountType === 'Digital' ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'}`}>
@@ -649,9 +654,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         {goals.map(goal => (
           <div key={goal.id} className="space-y-6 relative z-10">
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <Target size={18} className="text-indigo-200" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-100">Savings Target</span>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <Target size={18} className="text-indigo-200" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-100">Savings Target</span>
+                </div>
+                <p className="text-[10px] text-indigo-200/60 font-medium tracking-wide mt-1">Target will adapt as we learn from your financial behavior.</p>
               </div>
               <button onClick={() => { if (isEditingGoal) handleUpdateGoal(goal.id); else { setIsEditingGoal(true); setNewGoalVal(goal.targetAmount.toString()); } }} className="p-2 hover:bg-white/10 rounded-xl transition-colors">
                 {isEditingGoal ? <Check size={18} /> : <Edit2 size={16} />}
@@ -883,9 +891,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       {(() => {
         // Calculate total potential savings from pending Lex actions
         const totalSavings = pendingActions.reduce((sum, action) => sum + (action.amount || 0), 0) || 740; // Fallback to 740 if zero/empty to maintain UI preview
-        
+
         return (
-          <div 
+          <div
             onClick={() => {
               setLexTargetBucket('action');
               onNavigate('insights');
@@ -896,7 +904,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               <div className="bg-white dark:bg-premium-dark p-4 rounded-2xl shadow-sm text-emerald-500"><TrendingUp size={24} /></div>
               <div>
                 <h4 className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-[0.2em] mb-1 leading-none">RECOVERY MODE</h4>
-                <p className="text-xs font-bold text-emerald-900 dark:text-emerald-100/80">You have the potential to regain {mask(totalSavings)} this month by optimizing identified spending leaks.</p>
+                <p className="text-xs font-bold text-emerald-900 dark:text-emerald-100/80">Recommendations evolve as your financial patterns become clearer.</p>
               </div>
             </div>
             <div className="bg-emerald-100 dark:bg-emerald-500/20 p-2.5 rounded-full text-emerald-600 dark:text-emerald-400 group-hover:translate-x-1 transition-transform">
@@ -942,7 +950,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 {mask(45000)} <span className="text-xs font-medium text-slate-400 dark:text-premium-muted">by 2029</span>
               </p>
               <p className="text-[11px] font-medium text-slate-400 dark:text-premium-muted/60 leading-relaxed">
-                Based on your current ₹12.5k surplus at 12% avg yield.
+                Projection becomes more accurate as more data is observed.
               </p>
             </div>
           </div>

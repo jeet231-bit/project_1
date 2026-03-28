@@ -39,7 +39,7 @@ const UpdatePasswordScreen: React.FC = () => {
                 <div className="mb-8">
                     <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Set New Password</h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
-                        Create a new secure password for your Spndwisee account.
+                        Create a new secure password for your XpendWise account.
                     </p>
                 </div>
 

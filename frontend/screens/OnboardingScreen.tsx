@@ -282,6 +282,17 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
           })
         ));
       }
+      // Save cash wallet
+      if (cashWalletBalance) {
+        promises.push(
+          api.post('/bank-accounts', {
+            bank_name: 'Cash Wallet',
+            account_type: 'Cash',
+            balance: parseFloat(cashWalletBalance),
+            last_four: 'CASH',
+          })
+        );
+      }
       // Save EMIs (if user added any in step 3)
       if (emis.length > 0) {
         promises.push(...emis.map(e =>

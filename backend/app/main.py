@@ -7,8 +7,8 @@ load_dotenv()
 from .routers import subscriptions, expenses, dashboard, insights, actions, conversations, capital, commitments, onboarding, bank_accounts, export, chatbot, budgets
 
 app = FastAPI(
-    title="spndwisee API",
-    description="Backend for the spndwisee application.",
+    title="XpendWise API",
+    description="Backend for the XpendWise application.",
     version="0.1.0",
 )
 
@@ -60,7 +60,7 @@ app.include_router(budgets.router, prefix="/budgets", tags=["budgets"])
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the spndwisee API"}
+    return {"message": "Welcome to the XpendWise API"}
 
 @app.get("/health")
 def health_check():

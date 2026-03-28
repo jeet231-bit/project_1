@@ -9,7 +9,7 @@ import RoboIconUrl from './assets/logo-sym.svg';
 
 /* ── Brand Logo Icon ── */
 const RoboIcon = ({ size = 24 }: { size?: number }) => (
-  <img src={RoboIconUrl} width={size} height={size} alt="Spndwisee Support Bot" style={{ objectFit: 'contain' }} />
+  <img src={RoboIconUrl} width={size} height={size} alt="XpendWise Support Bot" style={{ objectFit: 'contain' }} />
 );
 
 /* ── Brand colors (indigo/blue from app's design system) ── */
@@ -32,7 +32,7 @@ const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [chatMode, setChatMode] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', parts: "Welcome to Spndwisee Support! I'm your AI Buddy. How may I assist you today?" }
+    { role: 'assistant', parts: "Welcome to XpendWise Support! I'm your AI Buddy. How may I assist you today?" }
   ]);
   const [inputVal, setInputVal] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -156,7 +156,7 @@ const Chatbot: React.FC = () => {
   const historyItems = [
     { text: 'How is my privacy maintained here?', color: C.accentLight },
     { text: 'Is my bank data safe?', color: C.purple },
-    { text: 'What features does Spndwisee offer?', color: C.pink },
+    { text: 'What features does XpendWise offer?', color: C.pink },
   ];
 
   const portalContent = (
