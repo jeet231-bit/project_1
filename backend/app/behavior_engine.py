@@ -146,11 +146,11 @@ def _subscription_burden(subscriptions: List[Any], expenses: List[Any]) -> Dict[
 
     # Use this month's expenses + subs as "total monthly"
     now = datetime.utcnow()
+    thirty_days_ago = now - timedelta(days=30)
     monthly_exp = sum(
         getattr(e, "amount", 0)
         for e in expenses
-        if _parse_date(getattr(e, "date", None)).month == now.month
-        and _parse_date(getattr(e, "date", None)).year == now.year
+        if _parse_date(getattr(e, "date", None)) >= thirty_days_ago
     )
 
     total = monthly_sub + monthly_exp
@@ -281,11 +281,11 @@ def _subscription_risk_scores(
 
     # ── Total monthly spend baseline ──
     now = datetime.utcnow()
+    thirty_days_ago = now - timedelta(days=30)
     monthly_exp = sum(
         getattr(e, "amount", 0)
         for e in expenses
-        if _parse_date(getattr(e, "date", None)).month == now.month
-        and _parse_date(getattr(e, "date", None)).year == now.year
+        if _parse_date(getattr(e, "date", None)) >= thirty_days_ago
     )
     monthly_sub = sum(
         _monthly_amount(s) for s in active_subs
@@ -494,11 +494,11 @@ def _financial_maturity_index(
     #    we use a heuristic: savings_score = 100 - (monthly_spend / estimated_income * 100)
     #    Estimated income = total monthly spend * 1.5 (assume 67% spend-to-income)
     now = datetime.utcnow()
+    thirty_days_ago = now - timedelta(days=30)
     monthly_exp = sum(
         getattr(e, "amount", 0)
         for e in expenses
-        if _parse_date(getattr(e, "date", None)).month == now.month
-        and _parse_date(getattr(e, "date", None)).year == now.year
+        if _parse_date(getattr(e, "date", None)) >= thirty_days_ago
     )
     monthly_sub = burden.get("monthly_sub_spend", 0)
     total_monthly = monthly_exp + monthly_sub

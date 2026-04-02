@@ -595,27 +595,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         </AnimatePresence>
 
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 px-1">
-          {/* Cash Wallet card */}
-          <div className={`min-w-[170px] bg-white dark:bg-premium-card border ${isEditingAccounts ? 'border-dashed border-indigo-300 dark:border-indigo-500/50 outline outline-4 outline-indigo-50 dark:outline-indigo-500/10' : 'border-slate-100 dark:border-white/5 cursor-pointer hover:border-indigo-100 dark:hover:border-indigo-900 active:border-indigo-100 dark:active:border-indigo-900'} p-5 rounded-[2.5rem] card-glow flex flex-col justify-between h-36 transition-colors shrink-0 group`}>
-            <div className="flex justify-between items-start">
-              <div className="w-9 h-9 rounded-2xl flex items-center justify-center text-xs bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                <Wallet size={16} />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-400 dark:text-premium-muted/50 text-[9px] font-black uppercase tracking-widest leading-none mb-1">Cash Wallet</p>
-              {isEditingAccounts ? (
-                <input
-                  type="number"
-                  value={cashBalance.currentBalance}
-                  onChange={e => updateCashBalance(parseFloat(e.target.value) || 0)}
-                  className="text-xl font-black text-slate-900 dark:text-premium-text tracking-tight bg-transparent outline-none border-b border-indigo-400 dark:border-indigo-500/50 w-full"
-                />
-              ) : (
-                <p className="text-xl font-black text-slate-900 dark:text-premium-text tracking-tight">{mask(cashBalance.currentBalance)}</p>
-              )}
-            </div>
-          </div>
+
 
           {/* Bank account cards */}
           {(() => {
@@ -634,10 +614,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 </button>
               )}
               <div className="flex justify-between items-start">
-                <div className={`w-9 h-9 rounded-2xl flex items-center justify-center text-xs ${acc.accountType === 'Digital' ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'}`}>
-                  {acc.accountType === 'Digital' ? <Wallet size={16} /> : <Building2 size={16} />}
+                <div className={`w-9 h-9 rounded-2xl flex items-center justify-center text-xs ${acc.accountType === 'Digital' || acc.accountType === 'Cash' ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'}`}>
+                  {acc.accountType === 'Digital' || acc.accountType === 'Cash' ? <Wallet size={16} /> : <Building2 size={16} />}
                 </div>
-                {!isEditingAccounts && <span className="text-slate-300 dark:text-premium-muted/30 text-[10px] font-bold">{`•••• ${acc.lastFour}`}</span>}
+                {!isEditingAccounts && <span className="text-slate-300 dark:text-premium-muted/30 text-[10px] font-bold">{acc.lastFour !== 'CASH' ? `•••• ${acc.lastFour}` : 'CASH'}</span>}
               </div>
               <div>
                 <p className="text-slate-400 dark:text-premium-muted/50 text-[9px] font-black uppercase tracking-widest leading-none mb-1 flex items-center gap-1">{acc.bankName} {isEditingAccounts && <Edit2 size={8} />}</p>

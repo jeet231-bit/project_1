@@ -1092,7 +1092,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                 </div>
 
                 {/* 1. Spend Volatility Index */}
-                <section className="bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 rounded-[36px] shadow-sm overflow-hidden">
+                <section className="bg-white dark:bg-premium-card border border-slate-100 dark:border-white/5 rounded-[36px] shadow-sm overflow-hidden text-left">
                   <button onClick={() => setExpandedBehavior(expandedBehavior === 'volatility' ? null : 'volatility')} className="w-full flex items-center justify-between p-6">
                     <div className="flex items-center gap-3">
                       <div className="bg-amber-50 dark:bg-amber-500/10 p-2.5 rounded-2xl text-amber-500"><Activity size={16} /></div>
@@ -1125,7 +1125,7 @@ const Insights: React.FC<InsightsProps> = ({ onNavigate }) => {
                             </svg>
                             <span className="absolute inset-0 flex items-center justify-center text-lg font-black text-slate-900 dark:text-premium-text">{behaviorMetrics.spend_volatility.volatility_score}</span>
                           </div>
-                          <div className="flex-1 space-y-2">
+                          <div className="flex-1 space-y-2 text-left">
                             <p className="text-xs font-bold text-slate-700 dark:text-premium-text">Volatility Score: <span className="font-black">{behaviorMetrics.spend_volatility.volatility_score}/100</span></p>
                             <p className="text-[10px] text-slate-400 dark:text-premium-muted">Trend: <span className="font-bold capitalize">{behaviorMetrics.spend_volatility.trend}</span></p>
                             {Object.keys(behaviorMetrics.spend_volatility.monthly_totals || {}).length > 0 && (

@@ -323,7 +323,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newExp: Expense = { ...exp, id: Math.random().toString(36).substr(2, 9) };
     setExpenses(prev => [newExp, ...prev]);
     if (exp.paymentMethod === PaymentMethod.CASH) {
-      setCashBalance(prev => ({ ...prev, currentBalance: prev.currentBalance - exp.amount }));
+      setBankAccounts(prev => {
+        const cashAcc = prev.find(a => a.accountType === 'Cash' || a.bankName.toLowerCase().includes('cash'));
+        if (cashAcc) {
+          const newBalance = cashAcc.balance - exp.amount;
+          api.put(`/bank-accounts/${cashAcc.id}`, { ...cashAcc, balance: newBalance }).catch(console.error);
+          return prev.map(a => a.id === cashAcc.id ? { ...a, balance: newBalance } : a);
+        }
+        return prev;
+      });
     }
   }, []);
 

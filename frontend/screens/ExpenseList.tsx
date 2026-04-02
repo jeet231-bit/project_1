@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const CATEGORIES = ['Food', 'Transport', 'Essentials', 'Health', 'Entertainment', 'Shopping', 'Education', 'Other'];
 
 const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNavigate }) => {
-  const { expenses, addExpense, updateExpense, deleteExpense, isSecureMode } = useApp();
+  const { expenses, addExpense, updateExpense, deleteExpense, isSecureMode, bankAccounts } = useApp();
   const [showAdd, setShowAdd] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
@@ -47,9 +47,20 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
   };
 
   const getSource = (method: string) => {
-    if (method === PaymentMethod.UPI) return "HDFC Bank • 4242";
-    if (method === PaymentMethod.CARD) return "ICICI Bank • 8821";
-    return "CASH";
+    const m = method.toLowerCase();
+    if (m === 'upi') {
+       const uAcc = bankAccounts.find(a => a.accountType === 'Savings' || a.accountType === 'Digital');
+       return uAcc ? `${uAcc.bankName} • ${uAcc.lastFour}` : "UPI";
+    }
+    if (m === 'card') {
+       const cAcc = bankAccounts.find(a => a.accountType === 'Credit') || bankAccounts.find(a => a.accountType === 'Savings');
+       return cAcc ? `${cAcc.bankName} • ${cAcc.lastFour}` : "CARD";
+    }
+    if (m === 'cash') {
+       const cashAcc = bankAccounts.find(a => a.accountType === 'Cash' || a.bankName.toLowerCase().includes('cash'));
+       return cashAcc ? cashAcc.bankName : "CASH";
+    }
+    return String(method).toUpperCase();
   };
 
   const mask = (val: number) => isSecureMode ? "••••" : `₹${val.toLocaleString()}`;
@@ -71,7 +82,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
 
       <div className="space-y-4">
         <AnimatePresence>
-          {expenses.map((exp, i) => (
+          {[...expenses].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((exp, i) => (
             <motion.div 
               key={exp.id} 
               initial={{ opacity: 0, y: 30 }} 
@@ -179,7 +190,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                   setIsSubmitting(true);
                   try {
                     // Try persisting to backend / Supabase
-                    await api.post('/expenses/', {
+                    await api.post('/expenses', {
                       name: newName.trim(),
                       amount,
                       category: newCategory,
