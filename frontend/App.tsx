@@ -85,8 +85,10 @@ const App: React.FC = () => {
       try {
         const res = await api.get('/onboarding/status');
         console.log('DEBUG: Onboarding status:', res);
-        const isLocallyFinished = localStorage.getItem('onboarding_passed') === 'true';
-        const activeLocalStep = localStorage.getItem('onboarding_step');
+        
+        const userId = s?.user?.id || 'unknown';
+        const isLocallyFinished = localStorage.getItem(`onboarding_passed_${userId}`) === 'true';
+        const activeLocalStep = localStorage.getItem(`onboarding_step_${userId}`);
 
         if (isLocallyFinished) {
           setStage('app');
@@ -206,8 +208,10 @@ const App: React.FC = () => {
   if (stage === 'onboarding') {
     return (
       <OnboardingScreen
+        userId={session?.user?.id}
         onComplete={() => {
-          localStorage.setItem('onboarding_passed', 'true');
+          const userId = session?.user?.id || 'unknown';
+          localStorage.setItem(`onboarding_passed_${userId}`, 'true');
           setStage('insightReveal');
         }}
       />

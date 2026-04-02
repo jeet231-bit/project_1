@@ -20,6 +20,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
   const [newCategory, setNewCategory] = useState('Food');
   const [newPayment, setNewPayment] = useState<PaymentMethod>(PaymentMethod.UPI);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
 
   const openEditModal = (exp: Expense) => {
     setEditingExpense(exp);
@@ -27,6 +28,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
     setNewAmount(String(exp.amount));
     setNewCategory(exp.category);
     setNewPayment(exp.paymentMethod);
+    setNewDate(exp.date);
   };
 
   const closeEditModal = () => {
@@ -35,6 +37,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
     setNewAmount('');
     setNewCategory('Food');
     setNewPayment(PaymentMethod.UPI);
+    setNewDate(new Date().toISOString().split('T')[0]);
   };
 
   const getIcon = (cat: string) => {
@@ -140,13 +143,21 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
               />
-              <input
-                type="number"
-                className="w-full bg-slate-50 dark:bg-premium-card border-none rounded-3xl p-6 font-black text-3xl outline-none dark:text-premium-text placeholder:text-slate-300 dark:placeholder:text-premium-muted/30 focus:ring-1 focus:ring-indigo-500 transition-all"
-                placeholder="₹0.00"
-                value={newAmount}
-                onChange={(e) => setNewAmount(e.target.value)}
-              />
+              <div className="flex gap-4">
+                <input
+                  type="number"
+                  className="w-full bg-slate-50 dark:bg-premium-card border-none rounded-3xl p-6 font-black text-3xl outline-none dark:text-premium-text placeholder:text-slate-300 dark:placeholder:text-premium-muted/30 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  placeholder="₹0.00"
+                  value={newAmount}
+                  onChange={(e) => setNewAmount(e.target.value)}
+                />
+                <input
+                  type="date"
+                  value={newDate}
+                  onChange={e => setNewDate(e.target.value)}
+                  className="bg-slate-50 dark:bg-premium-card border-none rounded-3xl p-6 font-bold text-slate-500 dark:text-premium-muted outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
+                />
+              </div>
               {/* Category selector */}
               <div className="flex flex-wrap gap-2">
                 {CATEGORIES.map(cat => (
@@ -181,7 +192,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
               </div>
             </div>
             <div className="flex gap-4 mt-12">
-              <button onClick={() => { setShowAdd(false); setNewName(''); setNewAmount(''); }} className="flex-1 py-5 text-slate-400 dark:text-premium-muted font-black uppercase text-[10px] tracking-[0.2em] hover:text-rose-500 transition-colors">Discard</button>
+              <button onClick={() => { setShowAdd(false); setNewName(''); setNewAmount(''); setNewDate(new Date().toISOString().split('T')[0]); }} className="flex-1 py-5 text-slate-400 dark:text-premium-muted font-black uppercase text-[10px] tracking-[0.2em] hover:text-rose-500 transition-colors">Discard</button>
               <button
                 disabled={isSubmitting || !newName.trim() || !newAmount}
                 onClick={async () => {
@@ -194,7 +205,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                       name: newName.trim(),
                       amount,
                       category: newCategory,
-                      date: new Date().toISOString().split('T')[0],
+                      date: newDate,
                       payment_method: newPayment,
                     });
                   } catch (err) {
@@ -214,6 +225,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                   setNewAmount('');
                   setNewCategory('Food');
                   setNewPayment(PaymentMethod.UPI);
+                  setNewDate(new Date().toISOString().split('T')[0]);
                   setIsSubmitting(false);
                   setShowAdd(false);
                 }}
@@ -242,13 +254,21 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
               />
-              <input
-                type="number"
-                className="w-full bg-slate-50 dark:bg-premium-card border-none rounded-3xl p-6 font-black text-3xl outline-none dark:text-premium-text placeholder:text-slate-300 dark:placeholder:text-premium-muted/30 focus:ring-1 focus:ring-indigo-500 transition-all"
-                placeholder="₹0.00"
-                value={newAmount}
-                onChange={(e) => setNewAmount(e.target.value)}
-              />
+              <div className="flex gap-4">
+                <input
+                  type="number"
+                  className="w-full bg-slate-50 dark:bg-premium-card border-none rounded-3xl p-6 font-black text-3xl outline-none dark:text-premium-text placeholder:text-slate-300 dark:placeholder:text-premium-muted/30 focus:ring-1 focus:ring-indigo-500 transition-all"
+                  placeholder="₹0.00"
+                  value={newAmount}
+                  onChange={(e) => setNewAmount(e.target.value)}
+                />
+                <input
+                  type="date"
+                  value={newDate}
+                  onChange={e => setNewDate(e.target.value)}
+                  className="bg-slate-50 dark:bg-premium-card border-none rounded-3xl p-6 font-bold text-slate-500 dark:text-premium-muted outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
+                />
+              </div>
               <div className="flex flex-wrap gap-2">
                 {CATEGORIES.map(cat => (
                   <button
@@ -301,7 +321,8 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                     name: newName.trim(),
                     amount,
                     category: newCategory,
-                    payment_method: newPayment,
+                    date: newDate,
+                    paymentMethod: newPayment,
                   };
                   try { await api.put(`/expenses/${editingExpense.id}`, updates); } catch {}
                   updateExpense(editingExpense.id, updates);

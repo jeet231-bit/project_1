@@ -9,6 +9,7 @@ import {
 
 interface OnboardingScreenProps {
   onComplete: () => void;
+  userId?: string;
 }
 
 // ── Step indicators ──────────────────────────────────────────────────
@@ -41,9 +42,9 @@ const PAYMENT_METHODS = ['UPI', 'Card', 'Cash'];
 // Component
 // ══════════════════════════════════════════════════════════════════════
 
-const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
+const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete, userId = 'unknown' }) => {
   const [step, setStep] = useState(() => {
-    const saved = localStorage.getItem('onboarding_step');
+    const saved = localStorage.getItem(`onboarding_step_${userId}`);
     return saved ? parseInt(saved, 10) : 0;
   }); // 0=Income, 1=Subs, 2=Expenses, 3=EMIs, 4=Accounts
   const [loading, setLoading] = useState(false);
@@ -51,8 +52,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
 
   // Sync step to localStorage
   React.useEffect(() => {
-    localStorage.setItem('onboarding_step', step.toString());
-  }, [step]);
+    localStorage.setItem(`onboarding_step_${userId}`, step.toString());
+  }, [step, userId]);
 
   // ── Income state ───────────────────────────────────────────────────
   const [incomeSource, setIncomeSource] = useState('Salary');
