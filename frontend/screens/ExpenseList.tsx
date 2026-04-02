@@ -194,10 +194,8 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                       name: newName.trim(),
                       amount,
                       category: newCategory,
-                      subcategory: '',
-                      tags: [],
                       date: new Date().toISOString().split('T')[0],
-                      paymentMethod: newPayment,
+                      payment_method: newPayment,
                     });
                   } catch (err) {
                     console.warn('Backend persist failed, saving locally:', err);
@@ -303,7 +301,7 @@ const ExpenseList: React.FC<{ onNavigate?: (screen: string) => void }> = ({ onNa
                     name: newName.trim(),
                     amount,
                     category: newCategory,
-                    paymentMethod: newPayment,
+                    payment_method: newPayment,
                   };
                   try { await api.put(`/expenses/${editingExpense.id}`, updates); } catch {}
                   updateExpense(editingExpense.id, updates);
